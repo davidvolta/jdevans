@@ -49,7 +49,7 @@ class GenerateResponse(BaseModel):
     signature: str
     similar_poems: List[SimilarPoem]
 
-def find_similar_poems(prompt: str, top_k: int = 2) -> List[dict]:
+def find_similar_poems(prompt: str, top_k: int = 3) -> List[dict]:
     """Find similar poems using OpenAI embeddings and cosine similarity."""
     response = client.embeddings.create(
         model="text-embedding-3-small",
