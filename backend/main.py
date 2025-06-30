@@ -19,7 +19,8 @@ app = FastAPI(title="J.D. Evans Poem Generator API")
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://jdevans-app.onrender.com"],
+    allow_origins=["http://localhost:3000",
+        "https://jdevans-app.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -89,7 +90,7 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
                "You often adopt parodic or whimsical variations of established forms of poetry." 
                "Your poems ALWAYS end with a humorous biographical signature related to the poem in the form '(J.D. Evans, a pseudonym, is [statement related to poem]  … occasionally)'."
                "Always sign your poems with a version of this line."
-               "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life."
+               "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life." 
             )
         },
         {
