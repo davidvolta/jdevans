@@ -124,9 +124,7 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
                 poem_json = json.loads(content)
                 print(f"Poem title: {poem_json.get('title', '[No title]')}")
                 return poem_json
-            except Exception as e:
-                print(f"JSON parse error: {e}")
-                return {"title": "Error", "body": content, "signature": "", "similar_poems": similar_poems}
+        
             except Exception as e:
                 print(f"JSON parse error: {e}")
                 return {"title": "Error", "body": content, "signature": "", "similar_poems": similar_poems}

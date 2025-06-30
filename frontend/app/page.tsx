@@ -24,7 +24,8 @@ export default function Home() {
     setPoem(null)
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate`, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiBaseUrl}/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,17 +70,6 @@ export default function Home() {
           </button>
         </form>
 
-        {error && (
-          <div className="error">
-            Error: {error}
-          </div>
-        )}
-
-        {isLoading && (
-          <div className="loading">
-            Generating your poem...
-          </div>
-        )}
       </div>
       {/* Right column: scrollable, margin to avoid overlap with fixed left */}
       <div className="right-column">
@@ -90,9 +80,15 @@ export default function Home() {
               <div className="poem-body">{poem.body}</div>
               {poem.signature && <div className="poem-signature">{poem.signature}</div>}
             </>
-          ) : (
-            'Your poem will appear here.'
-          )}
+          ) : isLoading ? (
+            <div className="loading">
+              Generating your poem...
+            </div>
+          ) : error ? (
+            <div className="error">
+              Error: {error}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
