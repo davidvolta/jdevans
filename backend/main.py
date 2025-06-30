@@ -25,24 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Sample poems for similarity search (hardcoded for now)
-SAMPLE_POEMS = [
-    {
-        "title": "Tribute to a 'Subber Code'",
-        "content": "For two weeks dow I'b had this code.\nA subber code! It's bery bad.\nA scratchy throat, a ruddy doze,\ned doebody seebs to udderstad\nbe wed I talk. I get doe sbiles or sybathy.\n(A leper has bore freds thad be.)\nBy ears are stuvved, I hack ed wheeze,\nI cough ed gasp, I sdiff ed sdeeze.\nI'b purchased ebery rebedy\nthe drug stores sell - frob A to Z.\nAspirid. Codact. Sidu-tabs.\nBicks idhalers. Pills ed caps-\nules. Duthig works. Dot chicked soup,\nor herbal tea; oradge juice or cadaloupe.\n\nEd writig poebs is tough edough,\nbut try it wed your doze is stuvved!\nDuthig seebs to rhybe today,\ned there's just wud thig I wad to say:\n\nPobes are bade by fools like be.\nWho write wed they're id bisery.\n\nAaaazcheeesh! Eduff. I quit this ode,\nby \"Tribute To A Subber Code.\"",
-        "signature": "(J.D. Evans, a pseudonym, is a South Jersey writer who can pronounce\nthe letters 'n' and 'm' ... occasionally.)"
-    },
-    {
-        "title": "Fatherhood's rewards; subtle, unending",
-        "content": "Sigmund Freud was overjoyed\nwhen he tripped on the id and the ego.\nBut I was in heaven when my eldest turned seven\nand we paddled down the Oswego.\nAlfred Nobel was happy as hell\nwhen he stumbled on T.N.T.\nBut I had more fun when my five-year-old son\nplayed a toy drum recital for ME.\nWhen Einstein declared E was m times c squared\nhe felt giddy and Truth-struck no doubt.\nBut my spirit soars up when I lift the oars up\nand watch my two boys fish for trout.\nTed Turner turns gray and gets older each day\nas he measures his wealth in Atlanta.\nBut I own a treasure that stops time forever:\nthe letters my sons sent to Santa.\n\nFame can be fickle. Ambition's a tickle\nthat can turn into terminal itch.\nBut thanks to my progeny, one thing is clear to me:\non Life's bottom line, I am rich!",
-        "signature": "(J.D. Evans, a pseudonym, is a South Jersey writer who yells at his sons\nwhen their bedrooms are a mess ... occasionally.)"
-    },
-    {
-        "title": "Happiness is warm Zapper",
-        "content": "I'd like to invent a pocket-sized Zapper\na portable, monogrammed laser-bushwacker.\nA painless and bloodless device I could use\nto \"eliminate\" (neatly) the people I choose.\n\n-\tOverweight drivers who swerve to the right\nbefore they turn left I would Zap with delight.\n-\tPeople at movies who chatter out loud\nI would Zap into atoms (if I were allowed.)\n-\tI'd Zap into vapors (if I had my way)\nall the zombies who tell me to \"have a nice day.\"\n-\tI'd Zap politicians and Howard Cosell,\nand unfunny people with dumb jokes to tell.\n-\tI'd Zap lines at banks and toll booths, of course.\nI'd Zap health food freaks without any remorse.\n-\tIf I saw a car that was parked on TWO spaces,\nI'd Zap car and driver. I wouldn't leave traces.\n\n-\tIf I had a Zapper I'd happily smite\nall the jerks who distract me when I try to write.\nBut one thought has soured this sweet fantasy:\nsuppose other people had Zappers like me,\nand one of them wanted to Zap and disperse\nanonymous authors of jangling verse ...\n\nBack to the drawing boards! Now I think twice,\nI'll develop an anti-Zap-Zapping device.",
-        "signature": "(J.D. Evans, a pseudonym, is a South Jersey writer who makes left turns\nafter switching on his right directional signal ... occasionally.)"
-    }
-]
+with open("poems.json", "r") as f:
+    SAMPLE_POEMS = json.load(f)
 
 # Create TF-IDF vectorizer for similarity search
 vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
