@@ -165,6 +165,24 @@ async def root():
 async def health_check():
     return {"status": "healthy"} 
 
+@app.get("/poems")
+async def get_poems():
+    """Get all poems for the archive."""
+    try:
+        # Return poems without embeddings to reduce payload size
+        poems = []
+        for poem in SAMPLE_POEMS:
+            poems.append({
+                "id": poem["id"],
+                "title": poem["title"],
+                "content": poem["content"],
+                "signature": poem.get("signature", "")
+            })
+        return poems
+    except Exception as e:
+        print(f"Error in get_poems: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/debug")
 async def debug_similarity(prompt: str):
     response = client.embeddings.create(
