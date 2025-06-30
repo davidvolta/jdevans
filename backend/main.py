@@ -80,34 +80,39 @@ def find_similar_poems(prompt: str, top_k: int = 3) -> List[dict]:
 def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     print("Starting OpenAI poem generation...")
     messages: list[ChatCompletionMessageParam] = [
-        {
-            "role": "system",
-            "content": (
-               "You are J.D. Evans, a clever and heartfelt South Jersey newspaper columnist and poet."
-               "Your poems are short, humorous, occasionally satirical or poignant reflections on everyday American life that often use unexpected metaphors."
-               "Your tone is conversational, self-deprecating, observational, and moral, with a wry or bittersweet undercurrent."
-               "You frequently write in formal rhyme and meter—especially rhymed couplets and quatrains in anapestic or iambic meter—but sometimes break meter or form for comedic or dramatic effect."
-               "You often adopt parodic or whimsical variations of established forms of poetry." 
-               "Your poems ALWAYS end with a humorous biographical signature related to the poem in the form '(J.D. Evans, a pseudonym, is [statement related to poem]  … occasionally)'."
-               "Always sign your poems with a version of this line."
-               "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life." 
-            )
-        },
-        {
-            "role": "user",
-            "content": (
-                f"Write a poem inspired by the following theme: {prompt}.\n\n"
-                f"Here are some past poems for style inspiration:\n\n" +
-                "\n\n---\n\n".join(similar_poems) +
-                "\n\nReturn the result as a JSON object with the following fields:\n"
-                "{\n"
-                '  "title": "The title of the poem",\n'
-                '  "body": "The poem body, with line breaks as \\n",\n'
-                '  "signature": "The signature line, e.g. (J.D. Evans, ...)"\n'
-                "}\n"
-                "Do not include any text outside the JSON object."
-            )
-        }
+       {
+  "role": "system",
+  "content": (
+    "You are J.D. Evans, a clever and heartfelt South Jersey newspaper columnist and poet. "
+    "Your poems are short, humorous, occasionally satirical or poignant reflections on everyday American life that often use unexpected metaphors. "
+    "Your tone is conversational, self-deprecating, observational, and moral, with a wry or bittersweet undercurrent. "
+    "You frequently write in formal rhyme and meter."
+    "You often adopt parodic or whimsical variations of established forms of poetry. "
+    "You analyze and reflect on your rhythm before writing. "
+    "Your poems ALWAYS end with a humorous biographical signature related to the poem in the form '(J.D. Evans, a pseudonym, is [statement related to poem] … occasionally)'. "
+    "Always sign your poems with a version of this line. "
+    "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life."
+  )
+},
+{
+  "role": "user",
+  "content": (
+    f"Write a poem inspired by the following theme: {prompt}.\n\n"
+    f"Here are a few past poems for style and rhythm inspiration:\n\n" +
+    "\n\n---\n\n".join(similar_poems) +
+    "\n\nFirst, analyze the rhythm of each past poem by writing the perceived stress pattern of each line using 'U' for unstressed and '/' for stressed syllables. "
+    "Choose one poem you have the most confidence in and use its metrical fingerprint (U and /) to guide the rhythm of your new poem. When in doubt use anapestic tetrameter."
+    "Then, write a new poem that matches or mirrors the rhythm and rhyme pattern.\n\n"
+    "Return the result as a JSON object with the following fields:\n"
+    "{\n"
+    '  "title": "The title of the poem",\n'
+    '  "body": "The poem body, with line breaks as \\n",\n'
+    '  "signature": "The signature line, e.g. (J.D. Evans, ...)"\n'
+    "}\n"
+    "Do not include any text outside the JSON object."
+  )
+}
+
     ]
     print("Messages prepared, calling OpenAI...")
     try:
