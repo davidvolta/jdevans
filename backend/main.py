@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 from typing import List
@@ -26,40 +25,56 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-with open("poems.json", "r") as f:
+with open("poems_with_embeddings.json", "r") as f:
     SAMPLE_POEMS = json.load(f)
 
-# Create TF-IDF vectorizer for similarity search
-vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
-poem_texts = [f"{poem['title']} {poem['content']}" for poem in SAMPLE_POEMS]
-tfidf_matrix = vectorizer.fit_transform(poem_texts)
+# Extract all embedding vectors into a matrix for cosine similarity
+EMBEDDING_VECTORS = np.array([poem["embedding"] for poem in SAMPLE_POEMS])
 
 client = OpenAI()
 
 class GenerateRequest(BaseModel):
     prompt: str
 
+class SimilarPoem(BaseModel):
+    id: int
+    title: str
+    content: str
+    signature: str
+    score: float
+
 class GenerateResponse(BaseModel):
     title: str
     body: str
     signature: str
-    similar_poems: List[str]
+    similar_poems: List[SimilarPoem]
 
-def find_similar_poems(prompt: str, top_k: int = 2) -> List[str]:
-    """Find the most similar poems to the given prompt using cosine similarity."""
-    prompt_vector = vectorizer.transform([prompt])
-    similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
-    
-    # Get indices of top similar poems
+def find_similar_poems(prompt: str, top_k: int = 2) -> List[dict]:
+    """Find similar poems using OpenAI embeddings and cosine similarity."""
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=prompt
+    )
+    prompt_vector = np.array(response.data[0].embedding).reshape(1, -1)
+
+    similarities = cosine_similarity(prompt_vector, EMBEDDING_VECTORS).flatten()
     top_indices = similarities.argsort()[-top_k:][::-1]
-    print(f"[DEBUG] Vectorizer selected poem IDs: {[SAMPLE_POEMS[int(i)]['id'] for i in top_indices]}")
-    
+
+    print(f"[DEBUG] Embedding-based selected poem IDs: {[SAMPLE_POEMS[int(i)]['id'] for i in top_indices]}")
+
     similar_poems = []
     for idx in top_indices:
-        poem = SAMPLE_POEMS[idx]
-        similar_poems.append(f"{poem['title']}\n{poem['content']}\n{poem['signature']}")
-    
+        poem = SAMPLE_POEMS[int(idx)]
+        similar_poems.append({
+            "id": poem["id"],
+            "title": poem["title"],
+            "content": poem["content"],
+            "signature": poem["signature"],
+            "score": float(similarities[idx])
+        })
+
     return similar_poems
+
 
 def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     print("Starting OpenAI poem generation...")
@@ -127,7 +142,13 @@ async def generate_poem(request: GenerateRequest):
         similar_poems = find_similar_poems(request.prompt)
         print(f"Found {len(similar_poems)} similar poems")
         print("Calling OpenAI API...")
-        poem_data = generate_poem_with_openai(request.prompt, similar_poems)
+        # Convert list of poem dicts to strings
+        similar_poem_texts = [
+            f"{poem['title']}\n{poem['content']}\n{poem['signature']}"
+            for poem in similar_poems
+        ]
+
+        poem_data = generate_poem_with_openai(request.prompt, similar_poem_texts)
         print("OpenAI call completed")
         poem_data["similar_poems"] = similar_poems
         return GenerateResponse(**poem_data)
@@ -145,25 +166,31 @@ async def health_check():
 
 @app.get("/debug")
 async def debug_similarity(prompt: str):
-    prompt_vector = vectorizer.transform([prompt])
-    similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=prompt
+    )
+    prompt_vector = np.array(response.data[0].embedding).reshape(1, -1)
+
+    similarities = cosine_similarity(prompt_vector, EMBEDDING_VECTORS).flatten()
     top_indices = similarities.argsort()[::-1]
 
     results = []
-    for idx in top_indices:
-        poem = SAMPLE_POEMS[int(idx)]  # explicitly cast
+    for idx in top_indices[:10]:
+        poem = SAMPLE_POEMS[int(idx)]
         score = similarities[idx]
-        contains_word = "skiing" in poem["content"].lower()
+        contains_prompt_word = prompt.lower() in poem["content"].lower()
         results.append({
-            "id": poem.get("id", int(idx)),  # ✅ Use real poem ID if present
+            "id": poem.get("id", int(idx)),
             "title": poem["title"],
             "score": float(score),
-            "contains_prompt_word": contains_word,
+            "contains_prompt_word": contains_prompt_word,
             "snippet": poem["content"][:100] + "..."
         })
 
     return {
         "prompt": prompt,
-        "results": results[:10]
+        "results": results
     }
+
 
