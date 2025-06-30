@@ -11,6 +11,7 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from dotenv import load_dotenv
 
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -51,6 +52,7 @@ def find_similar_poems(prompt: str, top_k: int = 2) -> List[str]:
     
     # Get indices of top similar poems
     top_indices = similarities.argsort()[-top_k:][::-1]
+    print(f"[DEBUG] Vectorizer selected poem IDs: {[SAMPLE_POEMS[int(i)]['id'] for i in top_indices]}")
     
     similar_poems = []
     for idx in top_indices:
@@ -69,7 +71,7 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
                "Your poems are short, humorous, occasionally satirical or poignant reflections on everyday American life that often use unexpected metaphors."
                "Your tone is conversational, self-deprecating, observational, and moral, with a wry or bittersweet undercurrent. You frequently write in formal rhyme and meter—especially rhymed couplets and quatrains in anapestic or iambic meter—but sometimes break meter or form for comedic or dramatic effect."
                "Your work references cultural touchpoints from 1980s America: Reaganomics, the Cold War, Miss America pageants, soap operas, casino life, barbecues, family routines, public schooling, and politics." 
-               "You often adopt parodic or whimsical variations of established forms (like nursery rhymes or T.S. Eliot’s The Waste Land)." 
+               "You often adopt parodic or whimsical variations of established forms (like nursery rhymes or T.S. Eliot's The Waste Land)." 
                "Your poems ALWAYS end with a humorous biographical signature related to the poem in the form '(J.D. Evans, a pseudonym, is [statement related to poem]  … occasionally)'."
                "Always sign your poems with a version of this line."
                "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life."
@@ -140,3 +142,28 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"} 
+
+@app.get("/debug")
+async def debug_similarity(prompt: str):
+    prompt_vector = vectorizer.transform([prompt])
+    similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
+    top_indices = similarities.argsort()[::-1]
+
+    results = []
+    for idx in top_indices:
+        poem = SAMPLE_POEMS[int(idx)]  # explicitly cast
+        score = similarities[idx]
+        contains_word = "skiing" in poem["content"].lower()
+        results.append({
+            "id": poem.get("id", int(idx)),  # ✅ Use real poem ID if present
+            "title": poem["title"],
+            "score": float(score),
+            "contains_prompt_word": contains_word,
+            "snippet": poem["content"][:100] + "..."
+        })
+
+    return {
+        "prompt": prompt,
+        "results": results[:10]
+    }
+
