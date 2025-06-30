@@ -6,6 +6,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import json
 from typing import List
+import os
+from openai import OpenAI
+from openai.types.chat import ChatCompletionMessageParam
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI(title="J.D. Evans Poem Generator API")
 
@@ -42,6 +49,8 @@ vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1, 2))
 poem_texts = [f"{poem['title']} {poem['content']}" for poem in SAMPLE_POEMS]
 tfidf_matrix = vectorizer.fit_transform(poem_texts)
 
+client = OpenAI()
+
 class GenerateRequest(BaseModel):
     prompt: str
 
@@ -60,44 +69,71 @@ def find_similar_poems(prompt: str, top_k: int = 2) -> List[str]:
     similar_poems = []
     for idx in top_indices:
         poem = SAMPLE_POEMS[idx]
-        similar_poems.append(f"Title: {poem['title']}\n{poem['content']}\n{poem['signature']}")
+        similar_poems.append(f"{poem['title']}\n{poem['content']}\n{poem['signature']}")
     
     return similar_poems
 
-def generate_mock_poem(prompt: str, similar_poems: List[str]) -> str:
-    """Generate a mock poem based on the prompt and similar poems."""
-    # This is a placeholder - in the real implementation, this would call OpenAI API
-    mock_poem = f"""Mock Poem for: "{prompt}"
-
-
-The {prompt.lower()} sits there, mocking me,
-A challenge that I cannot see.
-I try and try, but all in vain,
-The {prompt.lower()} drives me quite insane.
-
-Perhaps tomorrow I'll succeed,
-Or maybe I'll plant a different seed.
-For now I'll sit and contemplate,
-The mysteries of {prompt.lower()}'s fate.
-
-(J.D. Evans, a pseudonym, is a New Jersey writer who contemplates {prompt.lower()} ... occasionally.)"""
-    
-    return mock_poem
+def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> str:
+    print("Starting OpenAI poem generation...")
+    messages: list[ChatCompletionMessageParam] = [
+        {
+            "role": "system",
+            "content": (
+                "You are J.D. Evans, a clever and heartfelt South Jersey poet. "
+                "You often write poems about fatherhood, suburban life, and the strange joys of modern existence. "
+                "Use subtle humor, unexpected metaphors, and a slightly self-deprecating tone."
+            )
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Write a poem inspired by the following theme: {prompt}.\n\n"
+                f"Here are some past poems for style inspiration:\n\n" +
+                "\n\n---\n\n".join(similar_poems)
+            )
+        }
+    ]
+    print("Messages prepared, calling OpenAI...")
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=messages,
+            temperature=0.85,
+            max_tokens=500
+        )
+        print("OpenAI response received")
+        if response.choices and response.choices[0].message and response.choices[0].message.content:
+            result = response.choices[0].message.content.strip()
+            print(f"Generated poem length: {len(result)}")
+            return result
+        else:
+            print("No content in OpenAI response")
+            return "[OpenAI API Error]: No content returned from OpenAI."
+    except Exception as e:
+        print(f"OpenAI API error: {e}")
+        return f"[OpenAI API Error]: {e}"
 
 @app.post("/generate", response_model=GenerateResponse)
 async def generate_poem(request: GenerateRequest):
     try:
-        # Find similar poems
-        similar_poems = find_similar_poems(request.prompt)
+        print(f"Received request for prompt: {request.prompt}")
         
-        # Generate mock poem (replace with actual OpenAI call later)
-        generated_poem = generate_mock_poem(request.prompt, similar_poems)
+        # Find similar poems
+        print("Finding similar poems...")
+        similar_poems = find_similar_poems(request.prompt)
+        print(f"Found {len(similar_poems)} similar poems")
+        
+        # Generate poem with OpenAI
+        print("Calling OpenAI API...")
+        generated_poem = generate_poem_with_openai(request.prompt, similar_poems)
+        print("OpenAI call completed")
         
         return GenerateResponse(
             poem=generated_poem,
             similar_poems=similar_poems
         )
     except Exception as e:
+        print(f"Error in generate_poem: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/")

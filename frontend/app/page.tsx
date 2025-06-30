@@ -113,7 +113,23 @@ the letters 'n' and 'm' ... occasionally.)`
 
         <div className="right-column">
           <div className="poem-display">
-            <pre>{generatedPoem || defaultPoem}</pre>
+            {(() => {
+              const poem = generatedPoem || defaultPoem;
+              const signatureMatch = poem.match(/(\(J\.D\. Evans[\s\S]*?\))/);
+              if (signatureMatch) {
+                const [signature] = signatureMatch;
+                const poemBody = poem.replace(signature, '').trim();
+                return (
+                  <pre>
+                    {poemBody}
+                    {"\n\n"}
+                    <em>{signature}</em>
+                  </pre>
+                );
+              } else {
+                return <pre>{poem}</pre>;
+              }
+            })()}
           </div>
         </div>
       </div>
