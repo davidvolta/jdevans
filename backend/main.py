@@ -112,19 +112,21 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     print("Messages prepared, calling OpenAI...")
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4-turbo",
             messages=messages,
-            temperature=0.85,
+            temperature=0.7,
             max_tokens=500
         )
         print("OpenAI response received")
         if response.choices and response.choices[0].message and response.choices[0].message.content:
             content = response.choices[0].message.content.strip()
-            print(f"OpenAI raw content: {content}")
-            import json
             try:
                 poem_json = json.loads(content)
+                print(f"Poem title: {poem_json.get('title', '[No title]')}")
                 return poem_json
+            except Exception as e:
+                print(f"JSON parse error: {e}")
+                return {"title": "Error", "body": content, "signature": "", "similar_poems": similar_poems}
             except Exception as e:
                 print(f"JSON parse error: {e}")
                 return {"title": "Error", "body": content, "signature": "", "similar_poems": similar_poems}
