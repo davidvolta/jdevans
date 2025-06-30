@@ -31,6 +31,40 @@
   overflow: auto;
 }
 
+/* Mobile responsive breakpoint */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+  
+  .left-column {
+    position: relative;
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 24px 16px;
+  }
+  
+  .right-column {
+    margin-left: 0;
+    padding: 24px 16px;
+    min-height: auto;
+  }
+  
+  .poem-display {
+    padding: 20px;
+    font-size: 18px;
+  }
+  
+  .poem-body {
+    font-size: 18px;
+  }
+}
+
 .prompt-form {
   width: 100%;
 }
