@@ -1,57 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import './globals.css'
 
 interface GenerateResponse {
-  poem: string
+  title: string
+  body: string
+  signature: string
   similar_poems: string[]
 }
 
 export default function Home() {
   const [prompt, setPrompt] = useState('')
-  const [generatedPoem, setGeneratedPoem] = useState('')
+  const [poem, setPoem] = useState<GenerateResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-
-  // Default poem to show on page load
-  const defaultPoem = `Tribute to a 'Subber Code'
-
-For two weeks dow I'b had this code.
-A subber code! It's bery bad.
-A scratchy throat, a ruddy doze,
-ed doebody seebs to udderstad
-be wed I talk. I get doe sbiles or sybathy.
-(A leper has bore freds thad be.)
-By ears are stuvved, I hack ed wheeze,
-I cough ed gasp, I sdiff ed sdeeze.
-I'b purchased ebery rebedy
-the drug stores sell - frob A to Z.
-Aspirid. Codact. Sidu-tabs.
-Bicks idhalers. Pills ed caps-
-ules. Duthig works. Dot chicked soup,
-or herbal tea; oradge juice or cadaloupe.
-
-Ed writig poebs is tough edough,
-but try it wed your doze is stuvved!
-Duthig seebs to rhybe today,
-ed there's just wud thig I wad to say:
-
-Pobes are bade by fools like be.
-Who write wed they're id bisery.
-
-Aaaazcheeesh! Eduff. I quit this ode,
-by "Tribute To A Subber Code."
-
-(J.D. Evans, a pseudonym, is a South Jersey writer who can pronounce
-the letters 'n' and 'm' ... occasionally.)`
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!prompt.trim()) return
-
     setIsLoading(true)
     setError('')
-    setGeneratedPoem('')
+    setPoem(null)
 
     try {
       const response = await fetch('http://localhost:8000/generate', {
@@ -67,7 +37,7 @@ the letters 'n' and 'm' ... occasionally.)`
       }
 
       const data: GenerateResponse = await response.json()
-      setGeneratedPoem(data.poem)
+      setPoem(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -76,61 +46,53 @@ the letters 'n' and 'm' ... occasionally.)`
   }
 
   return (
-    <div className="container">
-      <div className="layout">
-        <div className="left-column">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <textarea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
+    <div className="layout">
+      {/* Left column: fixed width, always visible */}
+      <div className="left-column">
+        <form
+          className="prompt-form"
+          onSubmit={handleSubmit}
+        >
+          <textarea
+            className="prompt-textarea"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={5}
+            placeholder="Enter your prompt..."
+          />
+          <button
+            type="submit"
+            className="prompt-button"
+            disabled={isLoading || !prompt.trim()}
+          >
+            {isLoading ? 'Generating...' : 'Write'}
+          </button>
+        </form>
 
-            <button 
-              type="submit" 
-              className="button" 
-              disabled={isLoading || !prompt.trim()}
-            >
-              {isLoading ? 'Generating...' : 'Write'}
-            </button>
-          </form>
-
-          {error && (
-            <div style={{ color: 'red', marginTop: '1rem' }}>
-              Error: {error}
-            </div>
-          )}
-
-          {isLoading && (
-            <div className="loading">
-              Generating your poem...
-            </div>
-          )}
-        </div>
-
-        <div className="right-column">
-          <div className="poem-display">
-            {(() => {
-              const poem = generatedPoem || defaultPoem;
-              const signatureMatch = poem.match(/(\(J\.D\. Evans[\s\S]*?\))/);
-              if (signatureMatch) {
-                const [signature] = signatureMatch;
-                const poemBody = poem.replace(signature, '').trim();
-                return (
-                  <pre>
-                    {poemBody}
-                    {"\n\n"}
-                    <em>{signature}</em>
-                  </pre>
-                );
-              } else {
-                return <pre>{poem}</pre>;
-              }
-            })()}
+        {error && (
+          <div className="error">
+            Error: {error}
           </div>
+        )}
+
+        {isLoading && (
+          <div className="loading">
+            Generating your poem...
+          </div>
+        )}
+      </div>
+      {/* Right column: scrollable, margin to avoid overlap with fixed left */}
+      <div className="right-column">
+        <div className="poem-display">
+          {poem ? (
+            <>
+              <div className="poem-title">{poem.title}</div>
+              <div className="poem-body">{poem.body}</div>
+              {poem.signature && <div className="poem-signature">{poem.signature}</div>}
+            </>
+          ) : (
+            'Your poem will appear here.'
+          )}
         </div>
       </div>
     </div>

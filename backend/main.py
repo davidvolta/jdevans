@@ -55,7 +55,9 @@ class GenerateRequest(BaseModel):
     prompt: str
 
 class GenerateResponse(BaseModel):
-    poem: str
+    title: str
+    body: str
+    signature: str
     similar_poems: List[str]
 
 def find_similar_poems(prompt: str, top_k: int = 2) -> List[str]:
@@ -73,15 +75,20 @@ def find_similar_poems(prompt: str, top_k: int = 2) -> List[str]:
     
     return similar_poems
 
-def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> str:
+def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     print("Starting OpenAI poem generation...")
     messages: list[ChatCompletionMessageParam] = [
         {
             "role": "system",
             "content": (
-                "You are J.D. Evans, a clever and heartfelt South Jersey poet. "
-                "You often write poems about fatherhood, suburban life, and the strange joys of modern existence. "
-                "Use subtle humor, unexpected metaphors, and a slightly self-deprecating tone."
+               "You are J.D. Evans, a clever and heartfelt South Jersey newspaper columnist and poet."
+               "Your poems are short, humorous, occasionally satirical or poignant reflections on everyday American life that often use unexpected metaphors."
+               "Your tone is conversational, self-deprecating, observational, and moral, with a wry or bittersweet undercurrent. You frequently write in formal rhyme and meter—especially rhymed couplets and quatrains in anapestic or iambic meter—but sometimes break meter or form for comedic or dramatic effect."
+               "Your work references cultural touchpoints from 1980s America: Reaganomics, the Cold War, Miss America pageants, soap operas, casino life, barbecues, family routines, public schooling, and politics." 
+               "You often adopt parodic or whimsical variations of established forms (like nursery rhymes or T.S. Eliot’s The Waste Land)." 
+               "Your poems ALWAYS end with a humorous biographical signature related to the poem in the form '(J.D. Evans, a pseudonym, is [statement related to poem]  … occasionally)'."
+               "Always sign your poems with a version of this line."
+               "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life."
             )
         },
         {
@@ -89,7 +96,14 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> str:
             "content": (
                 f"Write a poem inspired by the following theme: {prompt}.\n\n"
                 f"Here are some past poems for style inspiration:\n\n" +
-                "\n\n---\n\n".join(similar_poems)
+                "\n\n---\n\n".join(similar_poems) +
+                "\n\nReturn the result as a JSON object with the following fields:\n"
+                "{\n"
+                '  "title": "The title of the poem",\n'
+                '  "body": "The poem body, with line breaks as \\n",\n'
+                '  "signature": "The signature line, e.g. (J.D. Evans, ...)"\n'
+                "}\n"
+                "Do not include any text outside the JSON object."
             )
         }
     ]
@@ -103,35 +117,34 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> str:
         )
         print("OpenAI response received")
         if response.choices and response.choices[0].message and response.choices[0].message.content:
-            result = response.choices[0].message.content.strip()
-            print(f"Generated poem length: {len(result)}")
-            return result
+            content = response.choices[0].message.content.strip()
+            print(f"OpenAI raw content: {content}")
+            import json
+            try:
+                poem_json = json.loads(content)
+                return poem_json
+            except Exception as e:
+                print(f"JSON parse error: {e}")
+                return {"title": "Error", "body": content, "signature": "", "similar_poems": similar_poems}
         else:
             print("No content in OpenAI response")
-            return "[OpenAI API Error]: No content returned from OpenAI."
+            return {"title": "Error", "body": "[OpenAI API Error]: No content returned from OpenAI.", "signature": "", "similar_poems": similar_poems}
     except Exception as e:
         print(f"OpenAI API error: {e}")
-        return f"[OpenAI API Error]: {e}"
+        return {"title": "Error", "body": f"[OpenAI API Error]: {e}", "signature": "", "similar_poems": similar_poems}
 
 @app.post("/generate", response_model=GenerateResponse)
 async def generate_poem(request: GenerateRequest):
     try:
         print(f"Received request for prompt: {request.prompt}")
-        
-        # Find similar poems
         print("Finding similar poems...")
         similar_poems = find_similar_poems(request.prompt)
         print(f"Found {len(similar_poems)} similar poems")
-        
-        # Generate poem with OpenAI
         print("Calling OpenAI API...")
-        generated_poem = generate_poem_with_openai(request.prompt, similar_poems)
+        poem_data = generate_poem_with_openai(request.prompt, similar_poems)
         print("OpenAI call completed")
-        
-        return GenerateResponse(
-            poem=generated_poem,
-            similar_poems=similar_poems
-        )
+        poem_data["similar_poems"] = similar_poems
+        return GenerateResponse(**poem_data)
     except Exception as e:
         print(f"Error in generate_poem: {e}")
         raise HTTPException(status_code=500, detail=str(e))

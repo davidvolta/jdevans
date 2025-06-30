@@ -1,145 +1,98 @@
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
-  margin: 0;
-  padding: 0;
-}
-
-.container {
-  width: 100%;
-  margin: 0;
-  padding: 2rem;
-  border: 3px solid red;
-  box-sizing: border-box;
-}
-
 .layout {
-  display: block;
+  display: flex;
   min-height: 100vh;
 }
 
 .left-column {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 20vw;
-  min-width: 200px;
-  max-width: 20vw;
-  height: 100vh;
-  border: 3px solid green;
-  background: white;
-  z-index: 1;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  background: #fafafa;
+  border-right: 2px solid #e0e0e0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: stretch;
-  padding: 0;
-  margin: 0;
+  align-items: center;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 40px 24px;
 }
 
 .right-column {
-  margin-left: 20vw;
-  width: 80vw;
-  max-width: 80vw;
-  border: 3px solid orange;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  margin-left: 320px;
+  flex: 1;
+  padding: 48px 40px;
+  background: white;
+  min-height: 100vh;
+  overflow: auto;
 }
 
-.form-group {
-  margin-bottom: 1rem;
-  border: 2px solid purple;
+.prompt-form {
   width: 100%;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  border: 1px solid pink;
-}
-
-.form-group input,
-.form-group textarea {
+.prompt-textarea {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-family: Helvetica, Arial, sans-serif;
-  border: 2px solid cyan;
   box-sizing: border-box;
-}
-
-.form-group textarea {
-  min-height: 100px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: inherit;
   resize: vertical;
 }
 
-.button {
-  background-color: #0070f3;
-  color: white;
-  padding: 0.75rem 1.5rem;
+.prompt-button {
+  width: 100%;
+  padding: 12px 0;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 6px;
+  font-size: 18px;
+  background: #0070f3;
+  color: white;
   cursor: pointer;
-  transition: background-color 0.2s;
-  border: 2px solid yellow;
-  width: 100%;
-  max-width: 600px;
-  box-sizing: border-box;
-}
-
-.button:hover {
-  background-color: #0051b3;
-}
-
-.button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.poem-result {
-  margin-top: 2rem;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  white-space: pre-wrap;
-  border: 3px solid magenta;
-}
-
-.loading {
-  text-align: center;
-  margin-top: 1rem;
-  border: 2px solid brown;
-  width: 100%;
-  max-width: 300px;
+  font-weight: 600;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: background 0.2s;
 }
 
 .poem-display {
-  padding: 1rem;
-  border: 3px solid yellow;
-  background-color: white;
-  width: 60%;
-  margin: 2rem auto;
-  display: block;
-}
-
-.poem-display pre {
-  margin: 0;
+  max-width: 700px;
+  margin: 0 auto;
   font-family: 'Times New Roman', Times, serif;
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1.6;
   white-space: pre-wrap;
-  word-wrap: break-word;
-  text-align: left;
-  display: inline-block;
-  max-width: 100%;
-} 
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  padding: 32px;
+  border: 1px solid #eee;
+}
+
+.poem-title {
+  font-weight: bold;
+  font-size: 1.3em;
+  margin-bottom: 1em;
+}
+
+.poem-body {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 24px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin-bottom: 1.5em;
+}
+
+.poem-signature {
+  font-style: italic;
+  font-size: 18px;
+  color: #555;
+  margin-top: 2em;
+}
