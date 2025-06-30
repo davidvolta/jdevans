@@ -93,13 +93,13 @@ export default function Home() {
         rows={5}
         placeholder="Enter your prompt..."
       />
-      <button
-        type="submit"
-        className="prompt-button"
-        disabled={isLoading || !prompt.trim()}
-      >
-        {isLoading ? 'Generating...' : 'Write'}
-      </button>
+                <button
+            type="submit"
+            className="prompt-button"
+            disabled={isLoading || !prompt.trim()}
+          >
+            Write
+          </button>
     </form>
   )
 
