@@ -146,29 +146,31 @@ export default function Home() {
       </div>
       {/* Right column: scrollable, margin to avoid overlap with fixed left */}
       <div className="right-column">
-        <div className="poem-display">
-          {poem ? (
-            <>
-              <div className="poem-title">{poem.title}</div>
-              <div className="poem-body">{poem.body}</div>
-              {poem.signature && <div className="poem-signature">{poem.signature}</div>}
-            </>
-          ) : selectedArchivePoem ? (
-            <>
-              <div className="poem-title">{selectedArchivePoem.title}</div>
-              <div className="poem-body">{selectedArchivePoem.content}</div>
-              {selectedArchivePoem.signature && <div className="poem-signature">{selectedArchivePoem.signature}</div>}
-            </>
-          ) : isLoading ? (
-            <div className="loading">
-              Generating your poem...
-            </div>
-          ) : error ? (
-            <div className="error">
-              Error: {error}
-            </div>
-          ) : null}
-        </div>
+        {(poem || selectedArchivePoem || isLoading || error) && (
+          <div className="poem-display">
+            {poem ? (
+              <>
+                <div className="poem-title">{poem.title}</div>
+                <div className="poem-body">{poem.body}</div>
+                {poem.signature && <div className="poem-signature">{poem.signature}</div>}
+              </>
+            ) : selectedArchivePoem ? (
+              <>
+                <div className="poem-title">{selectedArchivePoem.title}</div>
+                <div className="poem-body">{selectedArchivePoem.content}</div>
+                {selectedArchivePoem.signature && <div className="poem-signature">{selectedArchivePoem.signature}</div>}
+              </>
+            ) : isLoading ? (
+              <div className="loading">
+                Generating your poem...
+              </div>
+            ) : error ? (
+              <div className="error">
+                Error: {error}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -163,7 +163,11 @@
   }
   
   .poem-body {
-    font-size: 18px;
+    font-size: 16px !important;
+  }
+  
+  .poem-title {
+    font-size: 1.1em !important;
   }
 
   .tab-content {
