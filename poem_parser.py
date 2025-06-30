@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
 Poem Parser
-Converts a text file of poems to JSON format.
+Converts text files of poems to JSON format.
 Each poem has a title, content, signature, and ID.
+Can process multiple files in batch.
 """
 
 import json
 import re
+import os
+import glob
 from collections import OrderedDict
 
 def is_signature_end(line):
@@ -26,8 +29,22 @@ def parse_poems(file_path):
     """
     poems = []
     poem_id = 1
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+    
+    # Try different encodings
+    encodings = ['utf-8', 'latin-1', 'cp1252', 'iso-8859-1']
+    lines = None
+    
+    for encoding in encodings:
+        try:
+            with open(file_path, 'r', encoding=encoding) as file:
+                lines = file.readlines()
+            print(f"    Successfully read with {encoding} encoding")
+            break
+        except UnicodeDecodeError:
+            continue
+    
+    if lines is None:
+        raise Exception(f"Could not read file with any of the attempted encodings: {encodings}")
 
     n = len(lines)
     i = 0
@@ -101,24 +118,81 @@ def save_poems_to_json(poems, output_file):
         json.dump(poems, file, indent=2, ensure_ascii=False)
 
 
-def main():
-    """Main function to parse poems and save to JSON."""
-    input_file = "Occasionally1-100.txt"
-    output_file = "poems.json"
+def process_all_text_files(texts_dir="texts", output_file="poems.json"):
+    """
+    Process all .txt files in the texts directory and combine them into one JSON file.
     
-    print("Parsing poems from {}...".format(input_file))
-    poems = parse_poems(input_file)
+    Args:
+        texts_dir: Directory containing text files
+        output_file: Path to output JSON file
+    """
+    # Get all .txt files in the texts directory
+    text_files = glob.glob(os.path.join(texts_dir, "*.txt"))
+    text_files.sort()  # Sort to ensure consistent ordering
     
-    print("Found {} poems".format(len(poems)))
+    if not text_files:
+        print(f"No .txt files found in {texts_dir} directory")
+        return
+    
+    print(f"Found {len(text_files)} text files to process:")
+    for file in text_files:
+        print(f"  - {os.path.basename(file)}")
+    
+    all_poems = []
+    total_poems = 0
+    
+    for file_path in text_files:
+        print(f"\nProcessing {os.path.basename(file_path)}...")
+        try:
+            poems = parse_poems(file_path)
+            # Update IDs to be sequential across all files
+            for poem in poems:
+                poem['id'] = total_poems + poem['id']
+            all_poems.extend(poems)
+            total_poems = len(all_poems)
+            print(f"  Found {len(poems)} poems (total so far: {total_poems})")
+        except Exception as e:
+            print(f"  Error processing {file_path}: {e}")
+    
+    print(f"\nTotal poems found: {len(all_poems)}")
     
     # Save to JSON
-    save_poems_to_json(poems, output_file)
-    print("Saved poems to {}".format(output_file))
+    save_poems_to_json(all_poems, output_file)
+    print(f"Saved all poems to {output_file}")
     
     # Show first poem as example
-    if poems:
+    if all_poems:
         print("\nFirst poem:")
-        print(json.dumps(poems[0], indent=2))
+        print(json.dumps(all_poems[0], indent=2))
+
+
+def main():
+    """Main function to parse poems and save to JSON."""
+    # Check if texts directory exists
+    if os.path.exists("texts"):
+        print("Processing all text files in 'texts' directory...")
+        process_all_text_files()
+    else:
+        # Fallback to single file processing
+        input_file = "Occasionally1-100.txt"
+        output_file = "poems.json"
+        
+        if os.path.exists(input_file):
+            print("Parsing poems from {}...".format(input_file))
+            poems = parse_poems(input_file)
+            
+            print("Found {} poems".format(len(poems)))
+            
+            # Save to JSON
+            save_poems_to_json(poems, output_file)
+            print("Saved poems to {}".format(output_file))
+            
+            # Show first poem as example
+            if poems:
+                print("\nFirst poem:")
+                print(json.dumps(poems[0], indent=2))
+        else:
+            print("No input file found. Please ensure 'texts' directory exists or 'Occasionally1-100.txt' is present.")
 
 
 if __name__ == "__main__":
