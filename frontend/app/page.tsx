@@ -25,6 +25,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [archivePoems, setArchivePoems] = useState<ArchivePoem[]>([])
   const [selectedArchivePoem, setSelectedArchivePoem] = useState<ArchivePoem | null>(null)
+  const [showArchiveModal, setShowArchiveModal] = useState(false)
 
   // Load archive poems on component mount
   useEffect(() => {
@@ -79,6 +80,24 @@ export default function Home() {
     setSelectedArchivePoem(archivePoem)
     setPoem(null)
     setError('')
+    setShowArchiveModal(false) // Close modal when poem is selected
+  }
+
+  const handleModalPoemClick = (archivePoem: ArchivePoem) => {
+    setSelectedArchivePoem(archivePoem) // Set the selected poem
+    setPoem(null)
+    setError('')
+    setShowArchiveModal(false) // Close modal when poem is selected
+  }
+
+  const handleTabClick = (tab: 'new' | 'archive') => {
+    setActiveTab(tab)
+    if (tab === 'archive') {
+      setShowArchiveModal(true) // Show modal when archive tab is clicked
+    } else {
+      setShowArchiveModal(false) // Hide modal when new poem tab is clicked
+      setSelectedArchivePoem(null) // Clear selected archive poem when switching to new poem tab
+    }
   }
 
   const renderNewPoemTab = () => (
@@ -109,7 +128,7 @@ export default function Home() {
         {archivePoems.map((archivePoem) => (
           <div
             key={archivePoem.id}
-            className={`archive-poem-item ${selectedArchivePoem?.id === archivePoem.id ? 'selected' : ''}`}
+            className="archive-poem-item"
             onClick={() => handleArchivePoemClick(archivePoem)}
           >
             <div className="archive-poem-title">{archivePoem.title}</div>
@@ -128,13 +147,13 @@ export default function Home() {
           <div className="tab-header">
             <button
               className={`tab-button ${activeTab === 'new' ? 'active' : ''}`}
-              onClick={() => setActiveTab('new')}
+              onClick={() => handleTabClick('new')}
             >
               New Poem
             </button>
             <button
               className={`tab-button ${activeTab === 'archive' ? 'active' : ''}`}
-              onClick={() => setActiveTab('archive')}
+              onClick={() => handleTabClick('archive')}
             >
               Archive
             </button>
@@ -154,12 +173,13 @@ export default function Home() {
                 <div className="poem-body">{poem.body}</div>
                 {poem.signature && <div className="poem-signature">{poem.signature}</div>}
               </>
-            ) : selectedArchivePoem ? (
-              <>
-                <div className="poem-title">{selectedArchivePoem.title}</div>
-                <div className="poem-body">{selectedArchivePoem.content}</div>
-                {selectedArchivePoem.signature && <div className="poem-signature">{selectedArchivePoem.signature}</div>}
-              </>
+                      ) : selectedArchivePoem ? (
+            <>
+              <div className="poem-title">{selectedArchivePoem.title}</div>
+              <div className="poem-body">{selectedArchivePoem.content}</div>
+              {selectedArchivePoem.signature && <div className="poem-signature">{selectedArchivePoem.signature}</div>}
+            </>
+
             ) : isLoading ? (
               <div className="loading">
                 Generating your poem...
@@ -172,6 +192,35 @@ export default function Home() {
           </div>
         )}
       </div>
+      
+      {/* Mobile Archive Modal */}
+      {showArchiveModal && (
+        <div className="archive-modal-overlay">
+          <div className="archive-modal">
+            <div className="archive-modal-header">
+              <h3>Archive</h3>
+              <button 
+                className="archive-modal-close"
+                onClick={() => setShowArchiveModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="archive-modal-list">
+              {archivePoems.map((archivePoem) => (
+                <div
+                  key={archivePoem.id}
+                  className="archive-modal-poem-item"
+                  onClick={() => handleModalPoemClick(archivePoem)}
+                >
+                  <div className="archive-modal-poem-title">{archivePoem.title}</div>
+                  <div className="archive-modal-poem-id">#{archivePoem.id}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
