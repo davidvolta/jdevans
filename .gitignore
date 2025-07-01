@@ -118,7 +118,6 @@ tmp/
 temp/
 
 # Data files (but keep important config files)
-poems.json
 Occasionally1-100.txt
 
 # Model files and large data
