@@ -230,6 +230,92 @@
   cursor: not-allowed;
 }
 
+/* Mode toggle styling */
+.mode-toggle {
+  margin: 16px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.mode-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  user-select: none;
+}
+
+.mode-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #0070f3;
+  transition: all 0.3s ease;
+}
+
+.mode-label {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+/* Dim out checkbox and label when disabled */
+.prompt-button:disabled ~ .mode-toggle .mode-checkbox {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.prompt-button:disabled ~ .mode-toggle .mode-checkbox input[type="checkbox"] {
+  cursor: not-allowed;
+  accent-color: #ccc;
+}
+
+.prompt-button:disabled ~ .mode-toggle .mode-label {
+  color: #999;
+}
+
+/* Override rainbow animation when disabled */
+.prompt-button:disabled ~ .mode-toggle .mode-checkbox input[type="checkbox"]:checked + .mode-label {
+  background: none;
+  -webkit-text-fill-color: #999;
+  color: #999;
+  animation: none;
+  font-weight: 500;
+}
+
+/* Rainbow animation for 1980s mode */
+.mode-checkbox input[type="checkbox"]:checked + .mode-label {
+  background: linear-gradient(
+    45deg,
+    #ff0000,
+    #ff7f00,
+    #ffff00,
+    #00ff00,
+    #0000ff,
+    #4b0082,
+    #9400d3
+  );
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbow 2s ease-in-out infinite;
+  font-weight: 700;
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .poem-display {
   max-width: 700px;
   margin: 0 auto;
@@ -467,6 +553,49 @@
   display: block;
 }
 
+/* Generate image button */
+.generate-image-button {
+  background: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  max-width: 200px;
+}
+
+.generate-image-button:hover {
+  background: #0051cc;
+}
+
+.generate-image-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Image generating state */
+.image-generating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 18px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.image-generating .loading-gif {
+  width: 24px;
+  height: 24px;
+}
+
 /* Responsive image adjustments */
 @media (max-width: 768px) {
   .poem-image-container {
@@ -475,5 +604,10 @@
   
   .poem-image {
     border-radius: 3px;
+  }
+  
+  .image-generating {
+    padding: 30px 15px;
+    font-size: 16px;
   }
 }

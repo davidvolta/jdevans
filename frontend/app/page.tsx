@@ -8,6 +8,14 @@ interface GenerateResponse {
   body: string
   signature: string
   similar_poems: string[]
+  poem_id?: number
+  illustration_prompt?: string
+  illustration_url?: string
+}
+
+interface IllustrationResponse {
+  status: string
+  illustration_url?: string
 }
 
 interface ArchivePoem {
@@ -26,16 +34,24 @@ export default function Home() {
   const [archivePoems, setArchivePoems] = useState<ArchivePoem[]>([])
   const [selectedArchivePoem, setSelectedArchivePoem] = useState<ArchivePoem | null>(null)
   const [showArchiveModal, setShowArchiveModal] = useState(false)
+  const [illustrationUrl, setIllustrationUrl] = useState<string | null>(null)
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false)
+  const [is80sMode, setIs80sMode] = useState(false)
 
   // Load archive poems on component mount
   useEffect(() => {
     const loadArchivePoems = async () => {
       try {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+        console.log('Loading archive poems from:', `${apiBaseUrl}/poems`);
         const response = await fetch(`${apiBaseUrl}/poems`);
+        console.log('Archive response status:', response.status);
         if (response.ok) {
           const data = await response.json();
-          setArchivePoems(data);
+          console.log('Archive poems loaded:', data.poems?.length || 0);
+          setArchivePoems(data.poems || []);
+        } else {
+          console.error('Failed to load archive poems. Status:', response.status);
         }
       } catch (err) {
         console.error('Failed to load archive poems:', err);
@@ -45,6 +61,37 @@ export default function Home() {
     loadArchivePoems();
   }, []);
 
+  // Poll for illustration when user clicks generate image button
+  const startImageGeneration = () => {
+    if (!poem?.poem_id) return;
+
+    setIsGeneratingImage(true);
+    setIllustrationUrl(null);
+
+    const interval = setInterval(async () => {
+      try {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiBaseUrl}/illustration?poem_id=${poem.poem_id}`);
+        if (response.ok) {
+          const data: IllustrationResponse = await response.json();
+          
+          if (data.status === "ready") {
+            setIllustrationUrl(data.illustration_url || null);
+            setIsGeneratingImage(false);
+            clearInterval(interval);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to check illustration status:', err);
+        setIsGeneratingImage(false);
+        clearInterval(interval);
+      }
+    }, 3000); // poll every 3 seconds
+
+    // Store the interval ID so we can clear it if needed
+    return () => clearInterval(interval);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!prompt.trim()) return
@@ -52,6 +99,8 @@ export default function Home() {
     setError('')
     setPoem(null)
     setSelectedArchivePoem(null)
+    setIllustrationUrl(null)
+    setIsGeneratingImage(false)
 
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -60,7 +109,10 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: prompt.trim() }),
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+          mode: is80sMode ? "1980s" : null
+        }),
       })
 
       if (!response.ok) {
@@ -73,6 +125,7 @@ export default function Home() {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsLoading(false)
+      setIs80sMode(false) // Deselect the checkbox when poem is complete
     }
   }
 
@@ -80,6 +133,8 @@ export default function Home() {
     setSelectedArchivePoem(archivePoem)
     setPoem(null)
     setError('')
+    setIllustrationUrl(null)
+    setIsGeneratingImage(false)
     setShowArchiveModal(false) // Close modal when poem is selected
   }
 
@@ -87,6 +142,8 @@ export default function Home() {
     setSelectedArchivePoem(archivePoem) // Set the selected poem
     setPoem(null)
     setError('')
+    setIllustrationUrl(null)
+    setIsGeneratingImage(false)
     setShowArchiveModal(false) // Close modal when poem is selected
   }
 
@@ -97,6 +154,8 @@ export default function Home() {
     } else {
       setShowArchiveModal(false) // Hide modal when new poem tab is clicked
       setSelectedArchivePoem(null) // Clear selected archive poem when switching to new poem tab
+      setIllustrationUrl(null)
+      setIsGeneratingImage(false)
     }
   }
 
@@ -123,29 +182,46 @@ export default function Home() {
         rows={5}
         placeholder="Enter your prompt..."
       />
-                <button
-            type="submit"
-            className="prompt-button"
-            disabled={isLoading || !prompt.trim()}
-          >
-            Write
-          </button>
+      <button
+        type="submit"
+        className="prompt-button"
+        disabled={isLoading || !prompt.trim()}
+      >
+        Write
+      </button>
+      <div className="mode-toggle">
+        <label className="mode-checkbox">
+          <input
+            type="checkbox"
+            checked={is80sMode}
+            onChange={(e) => setIs80sMode(e.target.checked)}
+          />
+          <span className="mode-label">1980s Mode</span>
+        </label>
+      </div>
     </form>
   )
 
   const renderArchiveTab = () => (
     <div className="archive-container">
       <div className="archive-list">
-        {archivePoems.map((archivePoem) => (
-          <div
-            key={archivePoem.id}
-            className="archive-poem-item"
-            onClick={() => handleArchivePoemClick(archivePoem)}
-          >
-            <div className="archive-poem-title">{archivePoem.title}</div>
-            <div className="archive-poem-id">#{archivePoem.id}</div>
+        {archivePoems.length === 0 ? (
+          <div className="archive-loading">
+            <p>Loading archive poems...</p>
+            <p>Count: {archivePoems.length}</p>
           </div>
-        ))}
+        ) : (
+          archivePoems.map((archivePoem) => (
+            <div
+              key={archivePoem.id}
+              className="archive-poem-item"
+              onClick={() => handleArchivePoemClick(archivePoem)}
+            >
+              <div className="archive-poem-title">{archivePoem.title}</div>
+              <div className="archive-poem-id">#{archivePoem.id}</div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )
@@ -183,6 +259,43 @@ export default function Home() {
                 <div className="poem-title">{poem.title}</div>
                 <div className="poem-body">{poem.body}</div>
                 {poem.signature && <div className="poem-signature">{poem.signature}</div>}
+                {/* Render generate image button or generated image */}
+                {poem && !illustrationUrl && !isGeneratingImage && (
+                  <div className="poem-image-container">
+                    <button 
+                      className="generate-image-button"
+                      onClick={startImageGeneration}
+                      disabled={isGeneratingImage}
+                    >
+                      Generate Image
+                    </button>
+                  </div>
+                )}
+                
+                {/* Show loading state when generating */}
+                {isGeneratingImage && (
+                  <div className="poem-image-container">
+                    <div className="image-generating">
+                      <img src="/images/ui/loader.gif" alt="Generating..." className="loading-gif" />
+                      <span>Generating Image...</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Show generated image when ready */}
+                {illustrationUrl && (
+                  <div className="poem-image-container">
+                    <img 
+                      src={illustrationUrl}
+                      alt={`Generated illustration for ${poem.title}`}
+                      className="poem-image"
+                      onError={(e) => {
+                        // Hide the image if it fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </>
                       ) : selectedArchivePoem ? (
             <>

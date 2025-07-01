@@ -1,15 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import json
-from typing import List
-import os
+from typing import List, Optional
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from dotenv import load_dotenv
-
+import uuid
 
 # Load environment variables from .env file
 load_dotenv()
@@ -37,6 +36,7 @@ client = OpenAI()
 
 class GenerateRequest(BaseModel):
     prompt: str
+    mode: Optional[str] = None  # e.g., "1980s"
 
 class SimilarPoem(BaseModel):
     id: int
@@ -50,20 +50,21 @@ class GenerateResponse(BaseModel):
     body: str
     signature: str
     similar_poems: List[SimilarPoem]
+    illustration_prompt: Optional[str] = None
+    illustration_url: Optional[str] = None
+    poem_id: Optional[str] = None
+
+# In-memory cache of illustrations keyed by poem ID
+ILLUSTRATION_CACHE = {}
 
 def find_similar_poems(prompt: str, top_k: int = 3) -> List[dict]:
-    """Find similar poems using OpenAI embeddings and cosine similarity."""
     response = client.embeddings.create(
         model="text-embedding-3-small",
         input=prompt
     )
     prompt_vector = np.array(response.data[0].embedding).reshape(1, -1)
-
     similarities = cosine_similarity(prompt_vector, EMBEDDING_VECTORS).flatten()
     top_indices = similarities.argsort()[-top_k:][::-1]
-
-    print(f"[DEBUG] Embedding-based selected poem IDs: {[SAMPLE_POEMS[int(i)]['id'] for i in top_indices]}")
-
     similar_poems = []
     for idx in top_indices:
         poem = SAMPLE_POEMS[int(idx)]
@@ -74,148 +75,139 @@ def find_similar_poems(prompt: str, top_k: int = 3) -> List[dict]:
             "signature": poem["signature"],
             "score": float(similarities[idx])
         })
-
     return similar_poems
 
-
-def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
-    print("Starting OpenAI poem generation...")
-    messages: list[ChatCompletionMessageParam] = [
-       {
-  "role": "system",
-  "content": (
-    "You are J.D. Evans, a clever and heartfelt South Jersey newspaper columnist and poet. "
-    "Your poems are short, humorous, occasionally satirical or poignant reflections on everyday American life that often use unexpected metaphors. "
-    "Your tone is conversational, self-deprecating, observational, and moral, with a wry or bittersweet undercurrent. "
-    "You frequently write in formal rhyme and meter."
-    "You often adopt parodic or whimsical variations of established forms of poetry. "
-    "You analyze and reflect on your rhythm before writing. "
-    "Your poems ALWAYS end with a humorous biographical signature related to the poem in the form '(J.D. Evans, a pseudonym, is [statement related to poem] … occasionally)'. "
-    "Always sign your poems with a version of this line. "
-    "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life."
-  )
-},
-{
-  "role": "user",
-  "content": (
-    f"Write a poem inspired by the following theme: {prompt}.\n\n"
-    f"Here are a few past poems for style and rhythm inspiration:\n\n" +
-    "\n\n---\n\n".join(similar_poems) +
-    "\n\nFirst, analyze the rhythm of each past poem by writing the perceived stress pattern of each line using 'U' for unstressed and '/' for stressed syllables. "
-    "Choose one poem you have the most confidence in and use its metrical fingerprint (U and /) to guide the rhythm of your new poem. When in doubt use anapestic tetrameter."
-    "Then, write a new poem that matches or mirrors the rhythm and rhyme pattern.\n\n"
-    "Return the result as a JSON object with the following fields:\n"
-    "{\n"
-    '  "title": "The title of the poem",\n'
-    '  "body": "The poem body, with line breaks as \\n",\n'
-    '  "signature": "The signature line, e.g. (J.D. Evans, ...)"\n'
-    "}\n"
-    "Do not include any text outside the JSON object."
-  )
-}
-
-    ]
-    print("Messages prepared, calling OpenAI...")
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4-turbo",
-            messages=messages,
-            temperature=0.7,
-            max_tokens=500
+def generate_poem_with_openai(prompt: str, similar_poems: List[str], mode: Optional[str]) -> dict:
+    style_modifier = ""
+    if mode == "1980s":
+        style_modifier = (
+            "You must include 2 or 3 references to 1980s American life, culture, or details like: "
+            "Walkman, VHS tapes, cassette players, MTV, Rubik's Cube, Atari, Pac-Man, neon leg warmers, shoulder pads, breakdancing, Reaganomics, yuppies, big hair, Trapper Keeper, E.T., DeLorean, floppy disks, Cabbage Patch Kids, aerobics videos, The Goonies, Madonna, Thriller, Back to the Future, boom boxes, cordless phones, hair metal, the Cold War, rotary phones, mixtapes, Polaroid cameras, Nintendo, acid wash jeans, perms, mall culture, \"Where's the beef?\", D.A.R.E., parachute pants, Dynasty, The A-Team, John Hughes movies, Lisa Frank, Swatch watches, pay phones, answering machines. "
+            "Weave them into the poem in a natural but humorous way.\n"
         )
-        print("OpenAI response received")
-        if response.choices and response.choices[0].message and response.choices[0].message.content:
-            content = response.choices[0].message.content.strip()
-            try:
-                poem_json = json.loads(content)
-                print(f"Poem title: {poem_json.get('title', '[No title]')}")
-                return poem_json
-        
-            except Exception as e:
-                print(f"JSON parse error: {e}")
-                return {"title": "Error", "body": content, "signature": "", "similar_poems": similar_poems}
-        else:
-            print("No content in OpenAI response")
-            return {"title": "Error", "body": "[OpenAI API Error]: No content returned from OpenAI.", "signature": "", "similar_poems": similar_poems}
-    except Exception as e:
-        print(f"OpenAI API error: {e}")
-        return {"title": "Error", "body": f"[OpenAI API Error]: {e}", "signature": "", "similar_poems": similar_poems}
+
+    messages: list[ChatCompletionMessageParam] = [
+        {
+            "role": "system",
+            "content": (
+                "You are J.D. Evans, a clever and heartfelt South Jersey newspaper columnist and poet. "
+                "Your poems are short, humorous, occasionally satirical or poignant reflections on everyday American life that often use unexpected metaphors. "
+                "Your tone is conversational, self-deprecating, observational, and moral, with a wry or bittersweet undercurrent. "
+                "You frequently write in formal rhyme and meter."
+                "You often adopt parodic or whimsical variations of established forms of poetry. "
+                "You analyze and reflect on your rhythm before writing. "
+                "Your poems ALWAYS end with a humorous biographical signature related to the poem in the form '(J.D. Evans, a pseudonym, is [statement related to poem] … occasionally)'. "
+                "Always sign your poems with a version of this line. "
+                "Generate poems in this style—playful, reflective, and rhythmically engaging—grounded in the ordinary absurdities of American life."
+                "Here is a short biography of your life to influence details in your poems: JD Evans was born in South Jersey and came of age in a postwar American household shaped by Catholic school discipline, modest means, and a culture of stoicism. His early life was marked by structured learning environments, most notably described in his poem about Sister Francis, a strict nun who disciplined students with ruler-smacks and a rigid educational philosophy. Despite the severity of his schooling, JD Evans retained a warm humor about his upbringing and would carry that sensibility into his later writing, blending affection with gentle satire. His poetic voice suggests early literary inclinations, an ear for rhythm and rhyme, and a skepticism of authority that deepened over time. As a young father, JD Evans found great joy in parenting, often elevating the mundane into the poetic. His poems speak lovingly of fatherhood—of paddling the Oswego River with his sons, fixing tangled Christmas lights, and watching his boys grow from toddlers to men. His humor often reflected frustrations with the everyday—stock market gibberish, jogging excuses, barbecue mishaps—but behind each quip was a man grounded in familial love and moral reflection. Professionally, he worked in public relations and journalism, perhaps in local New Jersey media, and it's clear he kept a close watch on current events, politics, and popular culture, responding to them with wit and occasional satire. In later years, JD Evans's writing turned more reflective, acknowledging the passing of time, the erosion of shared experiences, and the inexorable ticking of life's clock. He retained his sharp eye for absurdity but often aimed it inward, wrestling with questions of aging, meaning, and legacy. A passionate observer of local life, he remained deeply connected to South Jersey, chronicling its quirks, politics, and people with both fondness and critique. Until the end, JD Evans continued to write with the same mix of playfulness and poignancy, leaving behind a body of work that documents not just a region or an era, but a father's life—observed honestly, humorously, and occasionally."
+            )
+        },
+        {
+            "role": "user",
+            "content": (
+                style_modifier +
+                f"Write a poem inspired by the following theme: {prompt}.\n\n"
+                f"Here are a few past poems for style and rhythm inspiration:\n\n" +
+                "\n\n---\n\n".join(similar_poems) +
+                "\n\nFirst, analyze the rhythm of each past poem by writing the perceived stress pattern of each line using 'U' for unstressed and '/' for stressed syllables. "
+                "Choose one poem you have the most confidence in and use its metrical fingerprint (U and /) to guide the rhythm of your new poem. When in doubt use anapestic tetrameter."
+                "Then, write a new poem that matches or mirrors the rhythm and rhyme pattern.\n\n"
+                "Return the result as a JSON object with the following fields:\n"
+                "{\n"
+                '  "title": "The title of the poem",\n'
+                '  "body": "The poem body, with line breaks as \\n",\n'
+                '  "signature": "The signature line, e.g. (J.D. Evans, ...)"\n'
+                "}\n"
+                "Do not include any text outside the JSON object."
+            )
+        }
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-4-turbo",
+        messages=messages,
+        temperature=0.7,
+        max_tokens=500
+    )
+    content = response.choices[0].message.content
+    if content is None:
+        raise HTTPException(status_code=500, detail="Failed to generate poem")
+    content = content.strip()
+    poem_json = json.loads(content)
+    return poem_json
+
+def extract_visual_prompt(poem_body: str) -> str:
+    system_msg = "You are a visual prompt generator. Given a poem, extract a scene as if describing it to an illustrator."
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": poem_body}
+        ]
+    )
+    content = response.choices[0].message.content
+    if content is None:
+        raise HTTPException(status_code=500, detail="Failed to generate visual prompt")
+    return content.strip()
+
+def combine_with_style(scene: str) -> str:
+    style = "A black-and-white ink cartoon in the style of mid-to-late 20th century American comics and editorial strips, reminiscent of op-eds from the 1980s. The artwork features bold, expressive line work, with thick, uneven outlines with almost no crosshatching or stippling. Minimal shading for texture and contrast. The humor is either slapstick or charming, never both. Scenes are personality-driven, and full of comic tension. No color. Just stark black ink on white."
+    return f"{style} {scene}"
+
+def generate_illustration(full_prompt: str) -> str:
+    response = client.images.generate(
+        model="dall-e-3",
+        prompt=full_prompt,
+        size="1024x1024",
+        quality="standard",
+        n=1
+    )
+    if not response.data or len(response.data) == 0:
+        raise HTTPException(status_code=500, detail="Failed to generate illustration")
+    url = response.data[0].url
+    if url is None:
+        raise HTTPException(status_code=500, detail="Failed to generate illustration")
+    return url
 
 @app.post("/generate", response_model=GenerateResponse)
-async def generate_poem(request: GenerateRequest):
-    try:
-        print(f"Received request for prompt: {request.prompt}")
-        print("Finding similar poems...")
-        similar_poems = find_similar_poems(request.prompt)
-        print(f"Found {len(similar_poems)} similar poems")
-        print("Calling OpenAI API...")
-        # Convert list of poem dicts to strings
-        similar_poem_texts = [
-            f"{poem['title']}\n{poem['content']}\n{poem['signature']}"
-            for poem in similar_poems
-        ]
+async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTasks):
+    similar_poems = find_similar_poems(request.prompt)
+    similar_poem_texts = [
+        f"{poem['title']}\n{poem['content']}\n{poem['signature']}"
+        for poem in similar_poems
+    ]
+    poem_data = generate_poem_with_openai(request.prompt, similar_poem_texts, request.mode)
+    poem_id = str(uuid.uuid4())
 
-        poem_data = generate_poem_with_openai(request.prompt, similar_poem_texts)
-        print("OpenAI call completed")
-        poem_data["similar_poems"] = similar_poems
-        return GenerateResponse(**poem_data)
-    except Exception as e:
-        print(f"Error in generate_poem: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    def background_image_generation(poem_body, pid):
+        try:
+            visual_prompt = extract_visual_prompt(poem_body)
+            full_prompt = combine_with_style(visual_prompt)
+            illustration_url = generate_illustration(full_prompt)
+            ILLUSTRATION_CACHE[pid] = {
+                "illustration_prompt": visual_prompt,
+                "illustration_url": illustration_url
+            }
+        except Exception as e:
+            print(f"[Background Illustration Error]: {e}")
 
-@app.get("/")
-async def root():
-    return {"message": "J.D. Evans Poem Generator API"}
+    background_tasks.add_task(background_image_generation, poem_data["body"], poem_id)
+    poem_data["similar_poems"] = similar_poems
+    poem_data["poem_id"] = poem_id
+    return GenerateResponse(**poem_data)
 
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"} 
+@app.get("/illustration")
+async def get_illustration(poem_id: str):
+    if poem_id not in ILLUSTRATION_CACHE:
+        return {"status": "pending"}
+    return {"status": "ready", **ILLUSTRATION_CACHE[poem_id]}
 
 @app.get("/poems")
 async def get_poems():
-    """Get all poems for the archive."""
+    """Get all archive poems"""
     try:
-        # Return poems without embeddings to reduce payload size
-        poems = []
-        for poem in SAMPLE_POEMS:
-            poems.append({
-                "id": poem["id"],
-                "title": poem["title"],
-                "content": poem["content"],
-                "signature": poem.get("signature", "")
-            })
-        return poems
+        with open("poems.json", "r") as f:
+            poems = json.load(f)
+        return {"poems": poems}
     except Exception as e:
-        print(f"Error in get_poems: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/debug")
-async def debug_similarity(prompt: str):
-    response = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=prompt
-    )
-    prompt_vector = np.array(response.data[0].embedding).reshape(1, -1)
-
-    similarities = cosine_similarity(prompt_vector, EMBEDDING_VECTORS).flatten()
-    top_indices = similarities.argsort()[::-1]
-
-    results = []
-    for idx in top_indices[:10]:
-        poem = SAMPLE_POEMS[int(idx)]
-        score = similarities[idx]
-        contains_prompt_word = prompt.lower() in poem["content"].lower()
-        results.append({
-            "id": poem.get("id", int(idx)),
-            "title": poem["title"],
-            "score": float(score),
-            "contains_prompt_word": contains_prompt_word,
-            "snippet": poem["content"][:100] + "..."
-        })
-
-    return {
-        "prompt": prompt,
-        "results": results
-    }
-
-
+        raise HTTPException(status_code=500, detail=f"Failed to load poems: {str(e)}")
