@@ -20,7 +20,8 @@ app = FastAPI(title="J.D. Evans Poem Generator API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000",
-        "https://jdevans-app.onrender.com"],
+        "https://jdevans-app.onrender.com",
+        "https://www.jdevanspoems.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

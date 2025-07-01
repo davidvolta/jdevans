@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
 .layout {
   display: flex;
   min-height: 100vh;
@@ -163,7 +165,7 @@
   }
   
   .poem-body {
-    font-size: 16px !important;
+    font-size: 18px !important;
   }
   
   .poem-title {
@@ -243,6 +245,7 @@
 }
 
 .poem-title {
+  font-family: 'New Century Schoolbook', 'Times New Roman', Times, serif;
   font-weight: bold;
   font-size: 1.3em;
   margin-bottom: 1em;

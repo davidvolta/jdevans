@@ -124,4 +124,8 @@ Occasionally1-100.txt
 # Model files and large data
 *.pkl
 *.h5
-*.model 
+*.model
+
+# Extracted images
+extracted_images_test/
+extracted_images/ 
