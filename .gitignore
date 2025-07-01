@@ -125,7 +125,3 @@ Occasionally1-100.txt
 *.pkl
 *.h5
 *.model
-
-# Extracted images
-extracted_images_test/
-extracted_images/ 
