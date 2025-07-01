@@ -194,4 +194,4 @@ def test_single_file():
         print(f"Error during test: {e}")
 
 if __name__ == "__main__":
-    test_single_file() 
+    process_all_documents() 

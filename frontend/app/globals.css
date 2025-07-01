@@ -271,6 +271,15 @@
   color: #666;
   font-size: 18px;
   padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.loading-gif {
+  width: 24px;
+  height: 24px;
 }
 
 .error {
@@ -442,4 +451,29 @@
 
 .select-different-poem-btn:hover {
   background: #0051cc;
+}
+
+/* Poem Image Styles */
+.poem-image-container {
+  margin-top: 2em;
+}
+
+.poem-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: block;
+}
+
+/* Responsive image adjustments */
+@media (max-width: 768px) {
+  .poem-image-container {
+    margin-top: 1.5em;
+  }
+  
+  .poem-image {
+    border-radius: 3px;
+  }
 }

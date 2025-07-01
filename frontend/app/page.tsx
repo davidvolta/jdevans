@@ -189,11 +189,24 @@ export default function Home() {
               <div className="poem-title">{selectedArchivePoem.title}</div>
               <div className="poem-body">{selectedArchivePoem.content}</div>
               {selectedArchivePoem.signature && <div className="poem-signature">{selectedArchivePoem.signature}</div>}
+              {/* Render image if it exists for this poem */}
+              <div className="poem-image-container">
+                <img 
+                  src={`/images/${selectedArchivePoem.id}.png`}
+                  alt={`Illustration for ${selectedArchivePoem.title}`}
+                  className="poem-image"
+                  onError={(e) => {
+                    // Hide the image if it doesn't exist
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
             </>
 
             ) : isLoading ? (
               <div className="loading">
-                Generating your poem...
+                <img src="/images/ui/loader.gif" alt="Loading..." className="loading-gif" />
+                <span>Generating your poem...</span>
               </div>
             ) : error ? (
               <div className="error">
