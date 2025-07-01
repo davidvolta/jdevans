@@ -100,6 +100,16 @@ export default function Home() {
     }
   }
 
+  const handlePromptKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      // Only submit if not loading and prompt is not empty
+      if (!isLoading && prompt.trim()) {
+        (e.target as HTMLTextAreaElement).form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }
+  };
+
   const renderNewPoemTab = () => (
     <form
       className="prompt-form"
@@ -109,6 +119,7 @@ export default function Home() {
         className="prompt-textarea"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
+        onKeyDown={handlePromptKeyDown}
         rows={5}
         placeholder="Enter your prompt..."
       />
@@ -142,9 +153,9 @@ export default function Home() {
   return (
     <div className="layout">
       {/* Left column: fixed width, always visible */}
-      <div className="left-column">
+      <div className={`left-column${activeTab === 'archive' ? ' archive-active' : ''}`}>
         <div className="tab-container">
-          <div className="tab-header">
+          <div className={`tab-header${activeTab === 'archive' ? ' archive-active' : ''}`}>
             <button
               className={`tab-button ${activeTab === 'new' ? 'active' : ''}`}
               onClick={() => handleTabClick('new')}
@@ -158,7 +169,7 @@ export default function Home() {
               Archive
             </button>
           </div>
-          <div className="tab-content">
+          <div className={`tab-content${activeTab === 'archive' ? ' archive-active' : ''}`}>
             {activeTab === 'new' ? renderNewPoemTab() : renderArchiveTab()}
           </div>
         </div>

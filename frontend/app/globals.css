@@ -177,6 +177,15 @@
   .archive-list {
     display: none;
   }
+  .tab-content.archive-active {
+    display: none;
+  }
+  .tab-header.archive-active {
+    border-bottom: none;
+  }
+  .left-column.archive-active {
+    border-bottom: none;
+  }
 }
 
 .prompt-form {
