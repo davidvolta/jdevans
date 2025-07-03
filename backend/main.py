@@ -36,7 +36,6 @@ client = OpenAI()
 
 class GenerateRequest(BaseModel):
     prompt: str
-    mode: Optional[str] = None  # e.g., "1980s"
 
 class SimilarPoem(BaseModel):
     id: int
@@ -77,14 +76,8 @@ def find_similar_poems(prompt: str, top_k: int = 3) -> List[dict]:
         })
     return similar_poems
 
-def generate_poem_with_openai(prompt: str, similar_poems: List[str], mode: Optional[str]) -> dict:
+def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     style_modifier = ""
-    if mode == "1980s":
-        style_modifier = (
-            "You must include 2 or 3 references to 1980s American life, culture, or details like: "
-            "Walkman, VHS tapes, cassette players, MTV, Rubik's Cube, Atari, Pac-Man, neon leg warmers, shoulder pads, breakdancing, Reaganomics, yuppies, big hair, Trapper Keeper, E.T., DeLorean, floppy disks, Cabbage Patch Kids, aerobics videos, The Goonies, Madonna, Thriller, Back to the Future, boom boxes, cordless phones, hair metal, the Cold War, rotary phones, mixtapes, Polaroid cameras, Nintendo, acid wash jeans, perms, mall culture, \"Where's the beef?\", D.A.R.E., parachute pants, Dynasty, The A-Team, John Hughes movies, Lisa Frank, Swatch watches, pay phones, answering machines. "
-            "Weave them into the poem in a natural but humorous way.\n"
-        )
 
     messages: list[ChatCompletionMessageParam] = [
         {
@@ -176,7 +169,7 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
         f"{poem['title']}\n{poem['content']}\n{poem['signature']}"
         for poem in similar_poems
     ]
-    poem_data = generate_poem_with_openai(request.prompt, similar_poem_texts, request.mode)
+    poem_data = generate_poem_with_openai(request.prompt, similar_poem_texts)
     poem_id = str(uuid.uuid4())
 
     def background_image_generation(poem_body, pid):
@@ -208,7 +201,9 @@ async def get_poems():
     try:
         with open("poems.json", "r") as f:
             poems = json.load(f)
-        return {"poems": poems}
+        # Return poems in reverse order (newest first)
+        poems_reversed = list(reversed(poems))
+        return {"poems": poems_reversed}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load poems: {str(e)}")
 

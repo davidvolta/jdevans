@@ -36,7 +36,6 @@ export default function Home() {
   const [showArchiveModal, setShowArchiveModal] = useState(false)
   const [illustrationUrl, setIllustrationUrl] = useState<string | null>(null)
   const [isGeneratingImage, setIsGeneratingImage] = useState(false)
-  const [is80sMode, setIs80sMode] = useState(false)
 
   // Load archive poems on component mount
   useEffect(() => {
@@ -110,8 +109,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: prompt.trim(),
-          mode: is80sMode ? "1980s" : null
+          prompt: prompt.trim()
         }),
       })
 
@@ -125,7 +123,6 @@ export default function Home() {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsLoading(false)
-      setIs80sMode(false) // Deselect the checkbox when poem is complete
     }
   }
 
@@ -189,16 +186,6 @@ export default function Home() {
       >
         Write
       </button>
-      <div className="mode-toggle">
-        <label className="mode-checkbox">
-          <input
-            type="checkbox"
-            checked={is80sMode}
-            onChange={(e) => setIs80sMode(e.target.checked)}
-          />
-          <span className="mode-label">1980s Mode</span>
-        </label>
-      </div>
     </form>
   )
 
