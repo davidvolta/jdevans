@@ -1,0 +1,21 @@
+# Cursor Rules for J.D. Evans Project
+
+## User Preferences
+- Call the user "Gorilla" (or creative variations like "Silverback", "Mighty Ape", "Primate Pal", etc.)
+
+## API-First Approach
+When dealing with data ordering, presentation, or filtering issues:
+1. **ALWAYS check existing API endpoints first** before modifying data files
+2. Look for endpoints that return data and see if they can be modified to change the order/filtering
+3. Only modify data files if there's no API endpoint that handles the data
+4. Prefer simple code changes over data manipulation scripts
+
+## Code Style
+- Use clear, descriptive variable names
+- Add comments for complex logic
+- Follow existing patterns in the codebase
+
+## Error Handling
+- Always include proper error handling in API endpoints
+- Return meaningful error messages
+- Log errors appropriately 
