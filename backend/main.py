@@ -208,7 +208,9 @@ async def get_poems():
     try:
         with open("poems.json", "r") as f:
             poems = json.load(f)
-        return {"poems": poems}
+        # Return poems in reverse order (newest first)
+        poems_reversed = list(reversed(poems))
+        return {"poems": poems_reversed}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load poems: {str(e)}")
 
