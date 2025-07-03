@@ -9,6 +9,7 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from dotenv import load_dotenv
 import uuid
+from datetime import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -162,6 +163,29 @@ def generate_illustration(full_prompt: str) -> str:
         raise HTTPException(status_code=500, detail="Failed to generate illustration")
     return url
 
+def save_user_poem(poem_data: dict, prompt: str):
+    # Get the next ID by finding the highest existing ID and adding 1
+    try:
+        with open("poems.json", "r") as f:
+            poems = json.load(f)
+        next_id = max(poem["id"] for poem in poems) + 1 if poems else 1
+    except FileNotFoundError:
+        poems = []
+        next_id = 1
+
+    user_poem = {
+        "id": next_id,
+        "title": poem_data["title"],
+        "content": poem_data["body"],  # Note: existing poems use "content" not "body"
+        "signature": poem_data["signature"],
+        "prompt": prompt
+    }
+
+    poems.append(user_poem)
+
+    with open("poems.json", "w") as f:
+        json.dump(poems, f, indent=2)
+
 @app.post("/generate", response_model=GenerateResponse)
 async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTasks):
     similar_poems = find_similar_poems(request.prompt)
@@ -187,6 +211,10 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
     background_tasks.add_task(background_image_generation, poem_data["body"], poem_id)
     poem_data["similar_poems"] = similar_poems
     poem_data["poem_id"] = poem_id
+    
+    # Save the user poem to poems.json
+    save_user_poem(poem_data, request.prompt)
+    
     return GenerateResponse(**poem_data)
 
 @app.get("/illustration")
