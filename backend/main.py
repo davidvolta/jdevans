@@ -211,3 +211,7 @@ async def get_poems():
         return {"poems": poems}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load poems: {str(e)}")
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
