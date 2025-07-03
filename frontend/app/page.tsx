@@ -240,12 +240,28 @@ export default function Home() {
       {/* Right column: scrollable, margin to avoid overlap with fixed left */}
       <div className="right-column">
         {(poem || selectedArchivePoem || isLoading || error) && (
-          <div className="poem-display">
+          <div className={`poem-display${(poem && illustrationUrl) || (selectedArchivePoem) ? ' has-top-image' : ''}`}>
             {poem ? (
               <>
+                {/* Show generated image when ready */}
+                {illustrationUrl && (
+                  <div className="poem-image-container">
+                    <img 
+                      src={illustrationUrl}
+                      alt={`Generated illustration for ${poem.title}`}
+                      className="poem-image"
+                      onError={(e) => {
+                        // Hide the image if it fails to load
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                
                 <div className="poem-title">{poem.title}</div>
                 <div className="poem-body">{poem.body}</div>
                 {poem.signature && <div className="poem-signature">{poem.signature}</div>}
+                
                 {/* Render generate image button or generated image */}
                 {poem && !illustrationUrl && !isGeneratingImage && (
                   <div className="poem-image-container">
@@ -268,27 +284,9 @@ export default function Home() {
                     </div>
                   </div>
                 )}
-                
-                {/* Show generated image when ready */}
-                {illustrationUrl && (
-                  <div className="poem-image-container">
-                    <img 
-                      src={illustrationUrl}
-                      alt={`Generated illustration for ${poem.title}`}
-                      className="poem-image"
-                      onError={(e) => {
-                        // Hide the image if it fails to load
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
               </>
                       ) : selectedArchivePoem ? (
             <>
-              <div className="poem-title">{selectedArchivePoem.title}</div>
-              <div className="poem-body">{selectedArchivePoem.content}</div>
-              {selectedArchivePoem.signature && <div className="poem-signature">{selectedArchivePoem.signature}</div>}
               {/* Render image if it exists for this poem */}
               <div className="poem-image-container">
                 <img 
@@ -301,6 +299,10 @@ export default function Home() {
                   }}
                 />
               </div>
+              
+              <div className="poem-title">{selectedArchivePoem.title}</div>
+              <div className="poem-body">{selectedArchivePoem.content}</div>
+              {selectedArchivePoem.signature && <div className="poem-signature">{selectedArchivePoem.signature}</div>}
             </>
 
             ) : isLoading ? (

@@ -247,6 +247,11 @@
   border: 1px solid #eee;
 }
 
+/* When image is at the top, remove top padding */
+.poem-display.has-top-image {
+  padding-top: 0;
+}
+
 .poem-title {
   font-family: 'New Century Schoolbook', 'Times New Roman', Times, serif;
   font-weight: bold;
@@ -257,7 +262,7 @@
 .poem-body {
   font-family: 'Times New Roman', Times, serif;
   font-size: 24px;
-  line-height: 1.6;
+  line-height: 1.8;
   white-space: pre-wrap;
   margin-bottom: 1.5em;
 }
@@ -459,15 +464,17 @@
 /* Poem Image Styles */
 .poem-image-container {
   margin-top: 2em;
+  margin-bottom: 3em;
 }
 
 .poem-image {
   width: 100%;
   max-width: 100%;
+  max-height: 50vh;
   height: auto;
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: block;
+  object-fit: contain;
 }
 
 /* Generate image button */
@@ -517,6 +524,7 @@
 @media (max-width: 768px) {
   .poem-image-container {
     margin-top: 1.5em;
+    margin-bottom: 2em;
   }
   
   .poem-image {
