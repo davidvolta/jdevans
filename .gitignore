@@ -119,6 +119,7 @@ temp/
 
 # Data files (but keep important config files)
 Occasionally1-100.txt
+poems.json
 
 # Model files and large data
 *.pkl
