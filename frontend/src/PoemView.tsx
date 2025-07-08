@@ -18,6 +18,11 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
     setImageError(false);
   }, [id]);
 
+  // Reset scroll position to top when component mounts or poem changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
   // Show loading state if we're generating and this is the generating poem
   if (isGenerating && generatingPoemId === id) {
     return (
@@ -40,19 +45,21 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
 
   return (
     <div className={`poem-display${poem.id && !imageError ? ' has-top-image' : ''}`}>
-      {poem.id && !imageError && (
-        <div className="poem-image-container">
-          <img 
-            src={`${import.meta.env.VITE_API_URL || ''}/static/images/${poem.id}.png`}
-            alt={`Illustration for ${poem.title}`}
-            className="poem-image"
-            onError={() => setImageError(true)}
-          />
-        </div>
-      )}
-      <div className="poem-title">{poem.title}</div>
-      <div className="poem-body">{poem.content}</div>
-      {poem.signature && <div className="poem-signature">{poem.signature}</div>}
+      <div className="poem-strip-inner">
+        {poem.id && !imageError && (
+          <div className="poem-image-container">
+            <img 
+              src={`${import.meta.env.VITE_API_URL || ''}/static/images/${poem.id}.png`}
+              alt={`Illustration for ${poem.title}`}
+              className="poem-image"
+              onError={() => setImageError(true)}
+            />
+          </div>
+        )}
+        <div className="poem-title">{poem.title}</div>
+        <div className="poem-body">{poem.content}</div>
+        {poem.signature && <div className="poem-signature">{poem.signature}</div>}
+      </div>
     </div>
   );
 };
