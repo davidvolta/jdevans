@@ -43,12 +43,10 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
       {poem.id && !imageError && (
         <div className="poem-image-container">
           <img 
-            src={`${import.meta.env.VITE_API_URL || ''}/static/${poem.id}.png`}
+            src={`${import.meta.env.VITE_API_URL || import.meta.env.BASE_URL}${poem.id}.png`}
             alt={`Illustration for ${poem.title}`}
             className="poem-image"
-            onError={() => {
-              setImageError(true);
-            }}
+            onError={() => setImageError(true)}
           />
         </div>
       )}
