@@ -257,10 +257,17 @@ async def get_poems():
 async def health_check():
     return {"status": "ok"}
 
-# Move this catch-all route to the very end:
+
+@app.get("/")
+async def serve_root():
+    index_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Index page not found")
+
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):
-    index_path = os.path.join("static", "index.html")
+    index_path = os.path.join(static_path, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
     raise HTTPException(status_code=404, detail="Page not found")
