@@ -22,7 +22,7 @@ function App() {
   const isMobile = useIsMobile()
 
   useEffect(() => {
-    fetch('http://localhost:8000/poems')
+    fetch('/poems')
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch poems')
         return res.json()
