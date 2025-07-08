@@ -38,6 +38,10 @@ function App() {
       })
   }, [])
 
+  const handlePoemGenerated = (newPoem: Poem & { content: string; signature?: string }) => {
+    setPoems(prevPoems => [newPoem, ...prevPoems]);
+  };
+
   if (isLoading) {
     return (
       <div className="loading">
@@ -57,7 +61,10 @@ function App() {
 
   return (
     <BrowserRouter>
-      {isMobile ? <MobileLayout poems={poems} /> : <DesktopLayout poems={poems} />}
+      {isMobile ? 
+        <MobileLayout poems={poems} onPoemGenerated={handlePoemGenerated} /> : 
+        <DesktopLayout poems={poems} onPoemGenerated={handlePoemGenerated} />
+      }
     </BrowserRouter>
   )
 }

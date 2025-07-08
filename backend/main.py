@@ -29,8 +29,10 @@ if os.getenv("ENV") != "production":
     )
 
 # Serve the React build from the "static" folder
-app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+base_dir = os.path.dirname(__file__)
+static_path = os.path.join(base_dir, "static")
 
+app.mount("/static", StaticFiles(directory=static_path, html=True), name="static")
 
 with open("poems_with_embeddings.json", "r") as f:
     SAMPLE_POEMS = json.load(f)
@@ -199,7 +201,14 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
         for poem in similar_poems
     ]
     poem_data = generate_poem_with_openai(request.prompt, similar_poem_texts)
-    poem_id = str(uuid.uuid4())
+
+    # Determine the next numeric ID
+    try:
+        with open("poems.json", "r") as f:
+            poems = json.load(f)
+        next_id = max(poem["id"] for poem in poems) + 1 if poems else 1
+    except FileNotFoundError:
+        next_id = 1
 
     def background_image_generation(poem_body, pid):
         try:
@@ -213,9 +222,9 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
         except Exception as e:
             print(f"[Background Illustration Error]: {e}")
 
-    background_tasks.add_task(background_image_generation, poem_data["body"], poem_id)
+    background_tasks.add_task(background_image_generation, poem_data["body"], str(next_id))
     poem_data["similar_poems"] = similar_poems
-    poem_data["poem_id"] = poem_id
+    poem_data["poem_id"] = next_id  # Use numeric ID
     
     # Save the user poem to poems.json
     save_user_poem(poem_data, request.prompt)

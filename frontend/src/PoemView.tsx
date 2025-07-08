@@ -3,11 +3,25 @@ import type { Poem } from './PoemList';
 
 interface PoemViewProps {
   poems: (Poem & { content: string; signature?: string })[];
+  isGenerating?: boolean;
+  generatingPoemId?: string | null;
 }
 
-const PoemView = ({ poems }: PoemViewProps) => {
+const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: PoemViewProps) => {
   const { id } = useParams<{ id: string }>();
   const poem = poems.find((p) => String(p.id) === id);
+
+  // Show loading state if we're generating and this is the generating poem
+  if (isGenerating && generatingPoemId === id) {
+    return (
+      <div className="poem-display">
+        <div className="loading">
+          <img src="/loader.gif" alt="Generating..." className="loading-gif" />
+          <span>Generating poem...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (!poem) {
     return (
