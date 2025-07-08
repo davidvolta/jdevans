@@ -23,10 +23,10 @@ const PoemList = ({ poems, selectedPoemId, onPoemClick }: PoemListProps) => {
         ) : (
           poems.map((poem) => (
             <Link
-              key={poem.id}
+              key={String(poem.id)}
               to={`/poem/${poem.id}`}
-              className={`archive-poem-item${selectedPoemId === poem.id ? ' selected' : ''}`}
-              onClick={() => onPoemClick && onPoemClick(poem.id)}
+              className={`archive-poem-item${String(selectedPoemId) === String(poem.id) ? ' selected' : ''}`}
+              onClick={() => onPoemClick && onPoemClick(String(poem.id))}
             >
               <div className="archive-poem-title">{poem.title}</div>
               <div className="archive-poem-id">#{poem.id}</div>
