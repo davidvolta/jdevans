@@ -24,10 +24,36 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: 'Times New Roman', Times, serif;
+  background: #fafbfc;
+  color: #222;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+/* Remove default ul/li styles */
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  list-style: none;
+}
+
+/* Responsive helpers */
+@media (max-width: 767px) {
+  body {
+    background: #fff;
+  }
 }
 
 h1 {
