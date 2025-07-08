@@ -5,7 +5,7 @@ import PromptForm from './PromptForm';
 import type { Poem } from './PoemList';
 
 interface MobileLayoutProps {
-  poems: (Poem & { body: string })[];
+  poems: (Poem & { content: string; signature?: string })[];
 }
 
 const MobileLayout = ({ poems }: MobileLayoutProps) => {

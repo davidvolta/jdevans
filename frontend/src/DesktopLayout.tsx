@@ -5,7 +5,7 @@ import type { Poem } from './PoemList';
 import PoemView from './PoemView';
 
 interface DesktopLayoutProps {
-  poems: (Poem & { body: string })[];
+  poems: (Poem & { content: string; signature?: string })[];
 }
 
 const DesktopLayout = ({ poems }: DesktopLayoutProps) => {
