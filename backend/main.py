@@ -34,7 +34,8 @@ static_path = os.path.join(base_dir, "static")
 
 app.mount("/static", StaticFiles(directory=static_path, html=True), name="static")
 
-with open("poems_with_embeddings.json", "r") as f:
+embedding_path = os.path.join(base_dir, "poems_with_embeddings.json")
+with open(embedding_path, "r") as f:
     SAMPLE_POEMS = json.load(f)
 
 # Extract all embedding vectors into a matrix for cosine similarity
