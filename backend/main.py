@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
 from pydantic import BaseModel
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -9,23 +11,26 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 from dotenv import load_dotenv
 import uuid
-from datetime import datetime
+import os
 
 # Load environment variables from .env file
 load_dotenv()
 
 app = FastAPI(title="J.D. Evans Poem Generator API")
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000",
-        "https://jdevans-app.onrender.com",
-        "https://www.jdevanspoems.com"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Enable CORS ONLY in dev mode
+if os.getenv("ENV") != "production":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Serve the React build from the "static" folder
+app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+
 
 with open("poems_with_embeddings.json", "r") as f:
     SAMPLE_POEMS = json.load(f)
@@ -238,3 +243,11 @@ async def get_poems():
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+# Move this catch-all route to the very end:
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    index_path = os.path.join("static", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    raise HTTPException(status_code=404, detail="Page not found")

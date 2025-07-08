@@ -2,12 +2,12 @@ import { useParams } from 'react-router-dom';
 import type { Poem } from './PoemList';
 
 interface PoemViewProps {
-  poems: (Poem & { body: string })[];
+  poems: (Poem & { content: string; signature?: string })[];
 }
 
 const PoemView = ({ poems }: PoemViewProps) => {
   const { id } = useParams<{ id: string }>();
-  const poem = poems.find((p) => p.id === id);
+  const poem = poems.find((p) => String(p.id) === id);
 
   if (!poem) {
     return (
@@ -32,8 +32,8 @@ const PoemView = ({ poems }: PoemViewProps) => {
         </div>
       )}
       <div className="poem-title">{poem.title}</div>
-      <div className="poem-body">{poem.body}</div>
-      <div className="poem-signature">— occasionally</div>
+      <div className="poem-body">{poem.content}</div>
+      {poem.signature && <div className="poem-signature">{poem.signature}</div>}
     </div>
   );
 };

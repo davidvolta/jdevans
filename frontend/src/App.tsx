@@ -169,16 +169,23 @@ function useIsMobile() {
 function App() {
   const [poems, setPoems] = useState<(Poem & { body: string })[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const isMobile = useIsMobile()
 
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setPoems(samplePoems)
-      setIsLoading(false)
-    }, 1000)
-
-    return () => clearTimeout(timer)
+    fetch('http://localhost:8000/poems')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch poems')
+        return res.json()
+      })
+      .then(data => {
+        setPoems(data.poems)
+        setIsLoading(false)
+      })
+      .catch(err => {
+        setError(err.message)
+        setIsLoading(false)
+      })
   }, [])
 
   if (isLoading) {
@@ -186,6 +193,14 @@ function App() {
       <div className="loading">
         <img src="/loader.gif" alt="Loading..." className="loading-gif" />
         <span>Loading poems...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="loading error">
+        <span>Error: {error}</span>
       </div>
     )
   }

@@ -26,7 +26,7 @@ const DesktopLayout = ({ poems }: DesktopLayoutProps) => {
       </div>
       <div className="right-column">
         <Routes>
-          <Route path="/" element={<div className="poem-display">Select a poem from the list.</div>} />
+          <Route path="/" element={<div />} />
           <Route path="/poem/:id" element={<PoemView poems={poems} />} />
         </Routes>
       </div>
