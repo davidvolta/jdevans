@@ -15,12 +15,7 @@ const PoemList = ({ poems, selectedPoemId, onPoemClick }: PoemListProps) => {
   return (
     <div className="archive-container">
       <div className="archive-list">
-        {poems.length === 0 ? (
-          <div className="loading">
-            <img src="/loader.gif" alt="Loading..." className="loading-gif" />
-            <span>Loading poems...</span>
-          </div>
-        ) : (
+        {poems.length === 0 ? null : (
           poems.map((poem) => (
             <Link
               key={String(poem.id)}
