@@ -22,7 +22,8 @@ function App() {
   const isMobile = useIsMobile()
 
   useEffect(() => {
-    fetch('/poems')
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    fetch(`${apiUrl}/poems`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch poems')
         return res.json()
