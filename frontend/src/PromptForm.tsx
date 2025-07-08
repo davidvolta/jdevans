@@ -32,7 +32,7 @@ const PromptForm = ({ onSubmit, isLoading = false }: PromptFormProps) => {
         onChange={(e) => setPrompt(e.target.value)}
         onKeyDown={handleKeyDown}
         rows={2}
-        placeholder="Enter your prompt..."
+        placeholder="What is your poem about?"
         disabled={isLoading}
       />
       <button

@@ -17,7 +17,6 @@ function useIsMobile() {
 
 function App() {
   const [poems, setPoems] = useState<(Poem & { content: string; signature?: string })[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const isMobile = useIsMobile()
 
@@ -30,11 +29,9 @@ function App() {
       })
       .then(data => {
         setPoems(data.poems)
-        setIsLoading(false)
       })
       .catch(err => {
         setError(err.message)
-        setIsLoading(false)
       })
   }, [])
 
