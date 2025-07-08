@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import type { Poem } from './PoemList';
 
 interface PoemViewProps {
@@ -10,13 +11,19 @@ interface PoemViewProps {
 const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: PoemViewProps) => {
   const { id } = useParams<{ id: string }>();
   const poem = poems.find((p) => String(p.id) === id);
+  const [imageError, setImageError] = useState<boolean>(false);
+
+  // Reset image error state when poem changes
+  useEffect(() => {
+    setImageError(false);
+  }, [id]);
 
   // Show loading state if we're generating and this is the generating poem
   if (isGenerating && generatingPoemId === id) {
     return (
       <div className="poem-display">
         <div className="loading">
-          <img src="/loader.gif" alt="Generating..." className="loading-gif" />
+          <div className="spinner"></div>
           <span>Generating poem...</span>
         </div>
       </div>
@@ -32,15 +39,15 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
   }
 
   return (
-    <div className={`poem-display${poem.id ? ' has-top-image' : ''}`}>
-      {poem.id && (
+    <div className={`poem-display${poem.id && !imageError ? ' has-top-image' : ''}`}>
+      {poem.id && !imageError && (
         <div className="poem-image-container">
           <img 
             src={`/${poem.id}.png`}
             alt={`Illustration for ${poem.title}`}
             className="poem-image"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
+            onError={() => {
+              setImageError(true);
             }}
           />
         </div>
