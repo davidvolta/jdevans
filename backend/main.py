@@ -29,7 +29,7 @@ if os.getenv("ENV") != "production":
     )
 
 # Serve the React build from the "static" folder
-base_dir = os.path.dirname(__file__)
+base_dir = os.path.dirname(os.path.abspath(__file__))
 static_path = os.path.join(base_dir, "static")
 
 app.mount("/static", StaticFiles(directory=static_path, html=True), name="static")
@@ -42,6 +42,9 @@ with open(embedding_path, "r") as f:
 EMBEDDING_VECTORS = np.array([poem["embedding"] for poem in SAMPLE_POEMS])
 
 client = OpenAI()
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+poems_path = os.path.join(base_dir, "poems.json")
 
 class GenerateRequest(BaseModel):
     prompt: str
@@ -174,7 +177,7 @@ def generate_illustration(full_prompt: str) -> str:
 def save_user_poem(poem_data: dict, prompt: str):
     # Get the next ID by finding the highest existing ID and adding 1
     try:
-        with open("poems.json", "r") as f:
+        with open(poems_path, "r") as f:
             poems = json.load(f)
         next_id = max(poem["id"] for poem in poems) + 1 if poems else 1
     except FileNotFoundError:
@@ -191,7 +194,7 @@ def save_user_poem(poem_data: dict, prompt: str):
 
     poems.append(user_poem)
 
-    with open("poems.json", "w") as f:
+    with open(poems_path, "w") as f:
         json.dump(poems, f, indent=2)
 
 @app.post("/generate", response_model=GenerateResponse)
@@ -205,7 +208,7 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
 
     # Determine the next numeric ID
     try:
-        with open("poems.json", "r") as f:
+        with open(poems_path, "r") as f:
             poems = json.load(f)
         next_id = max(poem["id"] for poem in poems) + 1 if poems else 1
     except FileNotFoundError:
@@ -242,7 +245,7 @@ async def get_illustration(poem_id: str):
 async def get_poems():
     """Get all archive poems"""
     try:
-        with open("poems.json", "r") as f:
+        with open(poems_path, "r") as f:
             poems = json.load(f)
         # Return poems in reverse order (newest first)
         poems_reversed = list(reversed(poems))
