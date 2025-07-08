@@ -42,15 +42,6 @@ function App() {
     setPoems(prevPoems => [newPoem, ...prevPoems]);
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading">
-        <img src="/loader.gif" alt="Loading..." className="loading-gif" />
-        <span>Loading poems...</span>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="loading error">
