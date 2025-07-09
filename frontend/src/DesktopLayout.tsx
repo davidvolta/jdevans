@@ -16,6 +16,7 @@ const DesktopLayout = ({ poems, onPoemGenerated, onPoemUpdated, onPoemRemoved }:
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingPoemId, setGeneratingPoemId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'classic' | 'new'>('classic');
   const match = location.pathname.match(/^\/poem\/(.+)$/);
   const selectedPoemId = match ? match[1] : undefined;
 
@@ -92,6 +93,8 @@ const DesktopLayout = ({ poems, onPoemGenerated, onPoemUpdated, onPoemRemoved }:
           selectedPoemId={selectedPoemId} 
           onPoemGenerated={handlePromptSubmit}
           isGenerating={isGenerating}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
       </div>
       <div className="right-column">

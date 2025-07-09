@@ -13,10 +13,11 @@ interface PoemListProps {
   onPoemClick?: (id: string) => void;
   onPoemGenerated?: (prompt: string) => void;
   isGenerating?: boolean;
+  activeTab?: 'classic' | 'new';
+  onTabChange?: (tab: 'classic' | 'new') => void;
 }
 
-const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGenerating }: PoemListProps) => {
-  const [activeTab, setActiveTab] = useState<'classic' | 'new'>('classic');
+const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGenerating, activeTab = 'classic', onTabChange }: PoemListProps) => {
 
   // Filter poems by type
   const classicPoems = poems.filter(poem => Number(poem.id) <= 252);
@@ -62,13 +63,13 @@ const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGener
       <div className="tab-navigation">
         <button
           className={`tab-button ${activeTab === 'classic' ? 'active' : ''}`}
-          onClick={() => setActiveTab('classic')}
+          onClick={() => onTabChange && onTabChange('classic')}
         >
           Classic
         </button>
         <button
           className={`tab-button ${activeTab === 'new' ? 'active' : ''}`}
-          onClick={() => setActiveTab('new')}
+          onClick={() => onTabChange && onTabChange('new')}
         >
           Modern
         </button>
