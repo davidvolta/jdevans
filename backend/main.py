@@ -12,6 +12,10 @@ from openai.types.chat import ChatCompletionMessageParam
 from dotenv import load_dotenv
 import uuid
 import os
+import requests
+import os
+from PIL import Image
+from io import BytesIO
 
 # Load environment variables from .env file
 load_dotenv()
@@ -197,6 +201,28 @@ def save_user_poem(poem_data: dict, prompt: str):
     with open(poems_path, "w") as f:
         json.dump(poems, f, indent=2)
 
+def download_and_save_image(image_url: str, poem_id: str) -> str:
+    """Download image from URL and save to static/images folder"""
+    try:
+        response = requests.get(image_url)
+        response.raise_for_status()
+        
+        # Open image with PIL to convert to PNG
+        img = Image.open(BytesIO(response.content))
+        
+        # Ensure static/images directory exists
+        images_dir = os.path.join(base_dir, "static", "images")
+        os.makedirs(images_dir, exist_ok=True)
+        
+        # Save as PNG
+        image_path = os.path.join(images_dir, f"{poem_id}.png")
+        img.save(image_path, "PNG")
+        
+        return image_path
+    except Exception as e:
+        print(f"Error downloading/saving image: {e}")
+        raise e
+
 @app.post("/generate", response_model=GenerateResponse)
 async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTasks):
     similar_poems = find_similar_poems(request.prompt)
@@ -214,19 +240,6 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
     except FileNotFoundError:
         next_id = 1
 
-    def background_image_generation(poem_body, pid):
-        try:
-            visual_prompt = extract_visual_prompt(poem_body)
-            full_prompt = combine_with_style(visual_prompt)
-            illustration_url = generate_illustration(full_prompt)
-            ILLUSTRATION_CACHE[pid] = {
-                "illustration_prompt": visual_prompt,
-                "illustration_url": illustration_url
-            }
-        except Exception as e:
-            print(f"[Background Illustration Error]: {e}")
-
-    background_tasks.add_task(background_image_generation, poem_data["body"], str(next_id))
     poem_data["similar_poems"] = similar_poems
     poem_data["poem_id"] = next_id  # Use numeric ID
     
@@ -234,6 +247,46 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
     save_user_poem(poem_data, request.prompt)
     
     return GenerateResponse(**poem_data)
+
+@app.post("/regenerate-illustration/{poem_id}")
+async def regenerate_illustration(poem_id: str, background_tasks: BackgroundTasks):
+    """Regenerate illustration for an existing poem"""
+    try:
+        with open(poems_path, "r") as f:
+            poems = json.load(f)
+        
+        # Find the poem by ID
+        poem = None
+        for p in poems:
+            if str(p["id"]) == poem_id:
+                poem = p
+                break
+        
+        if not poem:
+            raise HTTPException(status_code=404, detail="Poem not found")
+        
+        def background_image_generation(poem_body, pid):
+            try:
+                visual_prompt = extract_visual_prompt(poem_body)
+                full_prompt = combine_with_style(visual_prompt)
+                illustration_url = generate_illustration(full_prompt)
+                
+                # Download and save the image
+                download_and_save_image(illustration_url, pid)
+                
+                ILLUSTRATION_CACHE[pid] = {
+                    "illustration_prompt": visual_prompt,
+                    "illustration_url": illustration_url
+                }
+            except Exception as e:
+                print(f"[Background Illustration Error]: {e}")
+        
+        background_tasks.add_task(background_image_generation, poem["content"], poem_id)
+        
+        return {"status": "generating", "message": "Illustration generation started"}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to regenerate illustration: {str(e)}")
 
 @app.get("/illustration")
 async def get_illustration(poem_id: str):

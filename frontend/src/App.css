@@ -270,9 +270,14 @@ body, html {
   height: auto;
   display: block;
   margin: 0 auto 24px auto;
+  width: auto;
 }
 
-/* Generate image button */
+.generate-image-section {
+  margin-bottom: 2em;
+  text-align: left;
+}
+
 .generate-image-button {
   background: #0070f3;
   color: white;
@@ -286,6 +291,10 @@ body, html {
   width: 100%;
   max-width: 200px;
   font-family: 'Lato', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
 }
 
 .generate-image-button:hover {
@@ -316,34 +325,11 @@ body, html {
   height: 24px;
 }
 
-/* DEBUG BORDERS */
-.poem-display {
-  border: 2px solid blue !important;
-  background: none !important;
-}
-.right-column {
-  border: 2px solid green !important;
-  background: none !important;
-}
-.left-column {
-  border: 2px solid orange !important;
-  background: none !important;
-}
-.mobile-home {
-  border: 2px solid pink !important;
-  background: none !important;
-}
-.mobile-layout {
-  border: 2px solid gray !important;
-  background: none !important;
-}
-
 .poem-strip-inner {
-  max-width: 450px;
+  display: block;
   width: 100%;
   margin: 0 auto;
   text-align: left;
-  border: 2px dashed purple;
 }
 
 @media (min-width: 769px) {

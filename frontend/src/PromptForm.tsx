@@ -32,7 +32,7 @@ const PromptForm = ({ onSubmit, isLoading = false }: PromptFormProps) => {
         onChange={(e) => setPrompt(e.target.value)}
         onKeyDown={handleKeyDown}
         rows={2}
-        placeholder="What would you like J.D. Evans to write a poem about?"
+        placeholder="What is your poem about?"
         disabled={isLoading}
       />
       <button
