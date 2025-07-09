@@ -14,12 +14,21 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
   const [imageError, setImageError] = useState<boolean>(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [imageGenerationError, setImageGenerationError] = useState<string | null>(null);
+  const [isLoadingPoem, setIsLoadingPoem] = useState<boolean>(false);
 
   // Reset image error state when poem changes
   useEffect(() => {
     setImageError(false);
     setImageGenerationError(null);
+    setIsLoadingPoem(true);
   }, [id]);
+
+  // Clear loading state when poem is found
+  useEffect(() => {
+    if (poem) {
+      setIsLoadingPoem(false);
+    }
+  }, [poem]);
 
   // Reset scroll position to top when component mounts or poem changes
   useEffect(() => {
@@ -74,6 +83,18 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
         <div className="loading">
           <div className="spinner"></div>
           <span>J.D. Evans is writing...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state when switching between poems
+  if (isLoadingPoem) {
+    return (
+      <div className="poem-display">
+        <div className="loading">
+          <div className="spinner"></div>
+          <span>Loading poem...</span>
         </div>
       </div>
     );
