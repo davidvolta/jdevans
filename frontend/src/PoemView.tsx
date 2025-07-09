@@ -73,7 +73,7 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
       <div className="poem-display">
         <div className="loading">
           <div className="spinner"></div>
-          <span>Generating poem...</span>
+          <span>J.D. Evans is writing...</span>
         </div>
       </div>
     );
@@ -121,7 +121,7 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
             >
               {isGeneratingImage ? (
                 <>
-                  <div className="spinner" style={{ width: '16px', height: '16px', marginRight: '8px' }}></div>
+                  <div className="spinner" style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline-block' }}></div>
                   Adding Image...
                 </>
               ) : (

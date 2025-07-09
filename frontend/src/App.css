@@ -158,7 +158,7 @@ body, html {
   cursor: pointer;
   font-weight: 700;
   margin-top: 8px;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: 'Lato', sans-serif;
@@ -169,10 +169,11 @@ body, html {
 }
 
 .prompt-button:disabled {
-  background: #b8b8b8;
+  background: #b8b8b8 !important;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  transition: none;
 }
 
 /* Poem Display (serif/newspaper font) */
@@ -269,7 +270,7 @@ body, html {
   max-height: 400px;
   height: auto;
   display: block;
-  margin: 0 auto 24px auto;
+  margin: 0 0 24px 0;
   width: auto;
 }
 
@@ -279,8 +280,8 @@ body, html {
 }
 
 .generate-image-button {
-  background: #0070f3;
-  color: white;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
   border: none;
   border-radius: 8px;
   padding: 12px 24px;
@@ -291,14 +292,11 @@ body, html {
   width: 100%;
   max-width: 200px;
   font-family: 'Lato', sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
+  display: inline-block;
 }
 
 .generate-image-button:hover {
-  background: #0051cc;
+  background: rgba(102, 126, 234, 0.2);
 }
 
 .generate-image-button:disabled {
@@ -336,6 +334,102 @@ body, html {
   .poem-strip-inner {
     max-width: 800px;
   }
+}
+
+/* Mobile Layout Styles */
+.mobile-layout {
+  background: #fff;
+  min-height: 100vh;
+}
+
+.mobile-home {
+  background: #e3e6ea;
+  min-height: 100vh;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-home .prompt-form {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-sizing: border-box;
+  margin-bottom: 0;
+  font-family: 'Lato', sans-serif;
+}
+
+.mobile-home .archive-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+.mobile-home .archive-list {
+  font-family: 'Lato', sans-serif;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-home .archive-list::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-home .archive-poem-item {
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  background: #f0f1f4;
+  border: 1px solid #e0e3e8;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  width: 100%;
+  box-sizing: border-box;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  font-family: 'Lato', sans-serif;
+}
+
+.mobile-home .archive-poem-item:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-4px);
+}
+
+.mobile-home .archive-poem-item.selected {
+  background: rgba(255, 255, 255, 1);
+  border: 1px solid #667eea;
+}
+
+.mobile-home .archive-poem-title {
+  font-family: 'Lato', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 6px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mobile-home .archive-poem-id {
+  font-family: 'Lato', sans-serif;
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 500;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
 }
 
 @media (max-width: 768px) {

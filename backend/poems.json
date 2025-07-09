@@ -1513,16 +1513,37 @@
   },
   {
     "id": 253,
-    "title": "The Modest Quiz Master",
-    "content": "There's a test tonight at Murphy\u2019s bar, \nWhere trivia buffs from near and far \nGather round with pints of ale, \nHoping not to fail, but prevail. \n\nThe questions range from moon to sun, \nSporting feats and battles won, \nClassic books and cheesy shows, \nAncient myths, how fast grass grows. \n\nJane's quick with dates of ancient Rome, \nWhile Mike recalls a sports team's home, \nSally sings old TV themes, \nAnd Dave, well, Dave just daydreams. \n\nThe final round stumps one and all, \n'Til Mary shouts, feeling tall, \n'The capital of France is called Paris!' \nHer pint is raised in shared bliss. \n\nSo here's to brains that love to know, \nTo Murphy\u2019s where the thinkers go, \nWhere every answer earns a cheer\u2014 \nTest your wits and drink your beer!",
-    "signature": "(J.D. Evans, a pseudonym, is a New Jersey writer who thinks all answers should be multiple choice ... occasionally)",
-    "prompt": "test"
+    "title": "The Man in the Moon's Lament",
+    "content": "Oh, the man in the moon looks down on us, \nPeering through starlight, so wondrous, \nCasting his glow on lovers' bliss, \nWondering if there's more than this. \n\nHe's watched empires rise and fall, \nSeen the pyramids, big and tall, \nHeard the howling of midnight trains, \nFelt the sun's heat and April rains. \n\nEach night he mans his lunar post, \nA silent guardian, a spectral host, \nDreaming of seas he'll never sail, \nMourning the Earthly tales so frail. \n\nDoes he envy us, our dance with time? \nOr pity our race for its uphill climb? \nThe man in the moon with a face so old, \nKeeps his secrets, silent and cold. \n\nYet nightly, as children point up in awe, \nHe winks down at them through the cosmic straw, \nA quiet reminder in the night sky's bloom, \nWe\u2019re all just stories to the man in the moon.",
+    "signature": "(J.D. Evans, a pseudonym, is a New Jersey writer who chats with lunar listeners ... occasionally.)",
+    "prompt": "Man in the moon"
   },
   {
     "id": 254,
-    "title": "The Dilemmas of the Digital Age",
-    "content": "In an age where screens illuminate faces,\nAnd our thumbs are the swiftest of traces,\nWe swipe left and swipe right, in a digital dance,\nHoping pixels might lead to romance.\n\nWe tweet and we tag, oh the stories we'll post,\nEach update a boast, or a ghost from a host,\nOur followers many, our friendships are thin,\nThe depth of a like, can you feel it within?\n\nWe stream endless series, the next episode calls,\nWhile outside the window, the real hero falls,\nWe're synced up, plugged in, in a virtual spree,\nForgetting the joy of just letting thoughts be.\n\nSo here's to the unplugged, those wild daring few,\nWho savor the sunsets and morning's fresh dew,\nMay we sometimes recall, in our quest to connect,\nThat life's not a race to collect and collect.",
-    "signature": "(J.D. Evans, a pseudonym, is a New Jersey writer who forgets to charge his phone ... occasionally.)",
-    "prompt": "est"
+    "title": "The Art of the Family Barbecue",
+    "content": "My neighbor throws a barbecue \nwith sizzle, smoke, and flair, \ninviting all the neighborhood \nto come and share the air. \n\nHe grills with such precision, \nhis burgers never char, \nand every sausage glistens, \na culinary star. \n\nYet at our house, it's different, \nthe flames leap wild and high, \nthe chicken's mostly carbon \nand the hot dogs, nearly fry. \n\nI've singed my brows, lost eyelashes, \nand battled many a flare, \nwhile guests pretend it's 'smoky chic' \nand not just burning hair. \n\nBut still they come, and eat, and laugh, \nand say, 'It's quite the feat,' \nfor though my grilling's tragic, \nthey love the backyard heat. \n\nAnd isn't that the point of it? \nThe company and cheer? \nI'll raise my burnt hot dog up high, \nand toast to all that's here!",
+    "signature": "(J.D. Evans, a pseudonym, is a New Jersey writer who can't grill a sausage but can sure ignite a party ... occasionally.)",
+    "prompt": "TEll me about it"
+  },
+  {
+    "id": 255,
+    "title": "The Curious Case of Clarence the Camel",
+    "content": "In a quiet suburbia, not far from the beach,\nWhere lawns are well-trimmed and the neighbors all preach\nAbout HOA rules and the right shade of white\nFor picket-fenced yards under streetlamps at night,\n\nThere appeared on a Tuesday, to much disbelief,\nA creature from deserts, beyond all relief.\nClarence the Camel, with humps tall and proud,\nStrolled into our lives, drawing quite the crowd.\n\n'What business,' asked Mrs. McClure with a scoff,\n'Does a camel have here? Steve, please, see him off!'\nBut Clarence, unbothered by cries or by stares,\nChewed on Mrs. Johnson's prized petunias in pairs.\n\nThe children all loved him, his mysterious grace,\nAs he ambled aloof with a smile on his face.\nNot a creature of suburbs, but still he fit in,\nLike an uncle at Christmas, with his toothy grin.\n\nThe police were confounded, as camels are rare\nIn regions where snow is more common than sand.\nBut Clarence, it seems, had decided to stay,\nA desert ship sailing on pavement, not clay.\n\nNow he's a local celebrity, famed through the town,\nWearing tinsel and lights like a circus-born crown.\nAnd though camels don\u2019t typically roam our street,\nClarence found here, oddly, his own retreat.\n",
+    "signature": "(J.D. Evans, a pseudonym, is a New Jersey writer who now checks his garden for camels ... occasionally.)",
+    "prompt": "camels"
+  },
+  {
+    "id": 256,
+    "title": "The Ballad of the Workplace Boor",
+    "content": "In every office, there's always that one, \nWho thinks they're the sun, the light, all the fun. \nThey'll talk over you in every meeting, \nTheir self-love and praise, endlessly repeating. \n\nThey'll borrow your notes and never return 'em, \nSpill coffee on desks and refuse to clean 'em. \nThey gossip and smirk and hoard the best chairs, \nLeaving you standing when music stops in musical chairs. \n\nThey'll jam the printer and never fix it, \nLeave dishes in sinks, oh how they nix it! \nBut ask them to work, they'll vanish like mist, \nAlways somehow mysteriously off the list. \n\nYet, despite all this, they climb and they rise, \nLeaving us to muse, lament, and despise. \nBut let's raise a glass to this workplace plight, \nFor every office has its blight.",
+    "signature": "(J.D. Evans, a pseudonym, is acknowledging office irritations ... occasionally)",
+    "prompt": "assholes"
+  },
+  {
+    "id": 257,
+    "title": "The Ritual of the Morning Brew",
+    "content": "In every town, from coast to coast, \nthere's a sacred morning post. \nA kitchen counter, stained with rings, \nhosts a pot that gurgles and sings. \n\nThe ritual starts with a scoop or two \nof ground-up beans\u2014what a heady brew! \nWater boils, and filters hiss, \npreparing for that morning bliss. \n\nThe first sip's harsh, it bites, it sears, \nbut it chases away the night and fears. \nEyes half-shut, now open wide, \nwith every gulp, you're more alive. \n\nBy the second cup, oh, the world seems right, \nyour thoughts take wing, your heart feels light. \nBut woe betide if the pot runs dry, \nor heaven forbid, the power should die. \n\nFor then the day looks grim and bleak, \nwith sluggish thoughts and limbs so weak. \nSo here's to the brew that sets us free, \nthe humble cup of morning coffee.",
+    "signature": "(J.D. Evans, a pseudonym, is a New Jersey writer who savors his morning coffee ... occasionally.)",
+    "prompt": "this?"
   }
 ]

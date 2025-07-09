@@ -1,5 +1,8 @@
 set -o errexit  # Exit on error
 
+echo "🔄 Resetting poems to original state..."
+./reset-poems.sh
+
 echo "🔧 Installing frontend dependencies..."
 cd frontend
 npm install
