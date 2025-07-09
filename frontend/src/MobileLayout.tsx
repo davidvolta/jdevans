@@ -1,16 +1,17 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import PoemList from './PoemList';
-import PromptForm from './PromptForm';
 import type { Poem } from './PoemList';
 import PoemView from './PoemView';
 
 interface MobileLayoutProps {
   poems: (Poem & { content: string; signature?: string })[];
   onPoemGenerated?: (newPoem: Poem & { content: string; signature?: string }) => void;
+  onPoemUpdated?: (poemId: string, updatedPoem: Poem & { content: string; signature?: string }) => void;
+  onPoemRemoved?: (poemId: string) => void;
 }
 
-const MobileLayout = ({ poems, onPoemGenerated }: MobileLayoutProps) => {
+const MobileLayout = ({ poems, onPoemGenerated, onPoemUpdated, onPoemRemoved }: MobileLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
@@ -19,14 +20,31 @@ const MobileLayout = ({ poems, onPoemGenerated }: MobileLayoutProps) => {
   const selectedPoemId = match ? match[1] : undefined;
 
   const handlePromptSubmit = async (prompt: string) => {
+    let nextIdStr: string = '';
     try {
       setIsGenerating(true);
       // Calculate next numeric ID
       const maxId = poems.length > 0 ? Math.max(...poems.map(p => Number(p.id))) : 0;
       const nextId = maxId + 1;
-      setGeneratingPoemId(String(nextId));
+      nextIdStr = String(nextId);
+      setGeneratingPoemId(nextIdStr);
+      
+      // Create a loading poem immediately
+      const loadingPoem = {
+        id: nextIdStr,
+        title: 'Generating...',
+        content: 'J.D. Evans is writing your poem...',
+        signature: '',
+      };
+      
+      // Add the loading poem to the list immediately
+      if (onPoemGenerated) {
+        onPoemGenerated(loadingPoem);
+      }
+      
       // Navigate to the new poem URL immediately
-      navigate(`/poem/${nextId}`);
+      navigate(`/poem/${nextIdStr}`);
+      
       const apiUrl = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/generate`, {
         method: 'POST',
@@ -39,18 +57,26 @@ const MobileLayout = ({ poems, onPoemGenerated }: MobileLayoutProps) => {
         throw new Error('Failed to generate poem');
       }
       const data = await response.json();
-      const newPoem = {
-        id: String(nextId),
+      
+      // Update the poem with the real data
+      const realPoem = {
+        id: nextIdStr,
         title: data.title,
         content: data.body,
         signature: data.signature,
       };
-      if (onPoemGenerated) {
-        onPoemGenerated(newPoem);
+      
+      // Replace the loading poem with the real one
+      if (onPoemUpdated) {
+        onPoemUpdated(nextIdStr, realPoem);
       }
-      // No need to navigate again; already on the correct URL
+      
     } catch (error) {
       console.error('Error generating poem:', error);
+      // Remove the loading poem on error
+      if (onPoemRemoved && nextIdStr) {
+        onPoemRemoved(nextIdStr);
+      }
       navigate('/');
     } finally {
       setIsGenerating(false);

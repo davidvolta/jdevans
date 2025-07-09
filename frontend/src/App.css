@@ -115,54 +115,90 @@ body, html {
 .prompt-form {
   width: 100%;
   background: #f0f1f4;
-  border-radius: 0;
-  padding: 20px;
-  backdrop-filter: blur(10px);
   border: 1px solid #e0e3e8;
+  border-radius: 0;
+  padding: 16px 20px;
+  margin-bottom: 12px;
   box-sizing: border-box;
-  margin-bottom: 0;
   font-family: 'Lato', sans-serif;
+  transition: all 0.3s ease;
 }
 
 .prompt-textarea {
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 12px;
-  padding: 12px;
-  border: 2px solid #e1e5e9;
-  border-radius: 12px;
-  font-size: 14px;
+  margin-bottom: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  font-size: 18px;
   font-family: 'Lato', sans-serif;
-  color: #000;
-  resize: vertical;
-  background: white;
+  color: #555;
+  resize: none;
+  background: transparent;
   transition: all 0.3s ease;
-  min-height: 40px;
+  min-height: 24px;
   max-height: 200px;
   overflow-y: auto;
+  outline: none;
+}
+
+.prompt-textarea::placeholder {
+  color: #999;
+  font-style: normal;
+  font-weight: 400;
 }
 
 .prompt-textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .prompt-button {
   width: 100%;
-  padding: 14px 0;
+  padding: 8px 0;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 0;
+  font-size: 13px;
+  background: #667eea;
   color: white;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 500;
   margin-top: 8px;
-  transition: transform 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  text-transform: none;
+  letter-spacing: 0;
   font-family: 'Lato', sans-serif;
+  display: none;
+}
+
+.prompt-button.show {
+  display: block;
+}
+
+.new-poem-button {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 0;
+  font-size: 15px;
+  background: #667eea;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: 'Lato', sans-serif;
+  margin-bottom: 12px;
+}
+
+.new-poem-button:hover {
+  background: #5a67d8;
+}
+
+.new-poem-button:disabled {
+  background: #b8b8b8;
+  cursor: not-allowed;
 }
 
 .prompt-button:hover {
@@ -354,13 +390,13 @@ body, html {
 .mobile-home .prompt-form {
   width: 100%;
   background: #f0f1f4;
-  border-radius: 0;
-  padding: 20px;
-  backdrop-filter: blur(10px);
   border: 1px solid #e0e3e8;
+  border-radius: 0;
+  padding: 16px 20px;
+  margin-bottom: 12px;
   box-sizing: border-box;
-  margin-bottom: 0;
   font-family: 'Lato', sans-serif;
+  transition: all 0.3s ease;
 }
 
 .mobile-home .archive-container {
@@ -500,6 +536,13 @@ body, html {
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.new-tab-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .new-tab-content .prompt-form {

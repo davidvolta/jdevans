@@ -39,6 +39,16 @@ function App() {
     setPoems(prevPoems => [newPoem, ...prevPoems]);
   };
 
+  const handlePoemUpdated = (poemId: string, updatedPoem: Poem & { content: string; signature?: string }) => {
+    setPoems(prevPoems => 
+      prevPoems.map(poem => poem.id === poemId ? updatedPoem : poem)
+    );
+  };
+
+  const handlePoemRemoved = (poemId: string) => {
+    setPoems(prevPoems => prevPoems.filter(poem => poem.id !== poemId));
+  };
+
   if (error) {
     return (
       <div className="loading error">
@@ -50,8 +60,8 @@ function App() {
   return (
     <BrowserRouter>
       {isMobile ? 
-        <MobileLayout poems={poems} onPoemGenerated={handlePoemGenerated} /> : 
-        <DesktopLayout poems={poems} onPoemGenerated={handlePoemGenerated} />
+        <MobileLayout poems={poems} onPoemGenerated={handlePoemGenerated} onPoemUpdated={handlePoemUpdated} onPoemRemoved={handlePoemRemoved} /> : 
+        <DesktopLayout poems={poems} onPoemGenerated={handlePoemGenerated} onPoemUpdated={handlePoemUpdated} onPoemRemoved={handlePoemRemoved} />
       }
     </BrowserRouter>
   )

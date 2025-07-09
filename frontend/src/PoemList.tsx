@@ -70,7 +70,7 @@ const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGener
           className={`tab-button ${activeTab === 'new' ? 'active' : ''}`}
           onClick={() => setActiveTab('new')}
         >
-          New
+          Modern
         </button>
       </div>
 
