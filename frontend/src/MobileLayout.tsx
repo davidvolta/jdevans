@@ -63,8 +63,12 @@ const MobileLayout = ({ poems, onPoemGenerated }: MobileLayoutProps) => {
       <Routes>
         <Route path="/" element={
           <div className="mobile-home">
-            <PromptForm onSubmit={handlePromptSubmit} isLoading={isGenerating} />
-            <PoemList poems={poems} selectedPoemId={selectedPoemId} />
+            <PoemList 
+              poems={poems} 
+              selectedPoemId={selectedPoemId}
+              onPoemGenerated={handlePromptSubmit}
+              isGenerating={isGenerating}
+            />
           </div>
         } />
         <Route path="/poem/:id" element={

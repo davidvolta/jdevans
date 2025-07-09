@@ -15,12 +15,14 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [imageGenerationError, setImageGenerationError] = useState<string | null>(null);
   const [isLoadingPoem, setIsLoadingPoem] = useState<boolean>(false);
+  const [imageKey, setImageKey] = useState<number>(0);
 
   // Reset image error state when poem changes
   useEffect(() => {
     setImageError(false);
     setImageGenerationError(null);
     setIsLoadingPoem(true);
+    setImageKey(0);
   }, [id]);
 
   // Clear loading state when poem is found
@@ -53,18 +55,25 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
       
       // Poll for completion
       const pollForCompletion = async () => {
-        const checkResponse = await fetch(`${apiUrl}/illustration?poem_id=${poem.id}`);
-        const checkData = await checkResponse.json();
-        
-        if (checkData.status === 'ready') {
+        try {
+          const checkResponse = await fetch(`${apiUrl}/illustration?poem_id=${poem.id}`);
+          const checkData = await checkResponse.json();
+          
+          if (checkData.status === 'ready') {
+            setIsGeneratingImage(false);
+            setImageError(false);
+            // Add a small delay to ensure file is fully written
+            setTimeout(() => {
+              setImageKey(Date.now());
+            }, 500);
+          } else if (checkData.status === 'pending') {
+            setTimeout(pollForCompletion, 2000); // Poll every 2 seconds
+          } else {
+            throw new Error('Image generation failed');
+          }
+        } catch (error) {
           setIsGeneratingImage(false);
-          setImageError(false);
-          // Force a re-render by updating the image src
-          window.location.reload();
-        } else if (checkData.status === 'pending') {
-          setTimeout(pollForCompletion, 2000); // Poll every 2 seconds
-        } else {
-          throw new Error('Image generation failed');
+          setImageGenerationError(error instanceof Error ? error.message : 'Failed to check image status');
         }
       };
       
@@ -119,7 +128,8 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
         {poem.id && !imageError && (
           <div className="poem-image-container">
             <img 
-              src={`${import.meta.env.VITE_API_URL || ''}/static/images/${poem.id}.png`}
+              key={imageKey}
+              src={`${import.meta.env.VITE_API_URL || ''}/static/images/${poem.id}.png?t=${imageKey}`}
               alt={`Illustration for ${poem.title}`}
               className="poem-image"
               onError={() => setImageError(true)}

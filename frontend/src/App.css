@@ -15,7 +15,7 @@ body, html {
   width: 400px;
   min-width: 400px;
   max-width: 400px;
-  background: #e3e6ea !important;
+  background: #f5f6f8 !important;
   border-right: 1px solid #dee2e6;
   display: flex;
   flex-direction: column;
@@ -54,6 +54,7 @@ body, html {
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* IE and Edge */
+  flex: 1;
 }
 .archive-list::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
@@ -89,8 +90,8 @@ body, html {
 .archive-poem-title {
   font-family: 'Lato', sans-serif;
   font-size: 15px;
-  font-weight: 600;
-  color: #2d3748;
+  font-weight: 400;
+  color: #555;
   margin-bottom: 6px;
   line-height: 1.4;
   display: -webkit-box;
@@ -113,11 +114,11 @@ body, html {
 /* Prompt Form */
 .prompt-form {
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
+  background: #f0f1f4;
+  border-radius: 0;
   padding: 20px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #e0e3e8;
   box-sizing: border-box;
   margin-bottom: 0;
   font-family: 'Lato', sans-serif;
@@ -352,11 +353,11 @@ body, html {
 
 .mobile-home .prompt-form {
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
+  background: #f0f1f4;
+  border-radius: 0;
   padding: 20px;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #e0e3e8;
   box-sizing: border-box;
   margin-bottom: 0;
   font-family: 'Lato', sans-serif;
@@ -436,4 +437,71 @@ body, html {
   .poem-body {
     font-size: 18px !important;
   }
+}
+
+/* Poems Title */
+.poems-title {
+  font-family: 'Lato', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e3e8;
+  margin: 0 -20px 20px -20px;
+}
+
+.tab-button {
+  background: #fff;
+  border: none;
+  padding: 16px 20px;
+  font-family: 'Lato', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  flex: 1;
+  text-align: center;
+  outline: none;
+  border-radius: 0;
+}
+
+.tab-button:first-child {
+  border-right: 1px solid #e0e3e8;
+}
+
+.tab-button:hover {
+  color: #666;
+}
+
+.tab-button:focus {
+  outline: none;
+}
+
+.tab-button.active {
+  border-bottom-color: #667eea;
+}
+
+.tab-content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.new-tab-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.new-tab-content .prompt-form {
+  margin-bottom: 0;
 }

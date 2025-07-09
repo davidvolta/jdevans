@@ -272,12 +272,17 @@ async def regenerate_illustration(poem_id: str, background_tasks: BackgroundTask
                 illustration_url = generate_illustration(full_prompt)
                 
                 # Download and save the image
-                download_and_save_image(illustration_url, pid)
+                image_path = download_and_save_image(illustration_url, pid)
                 
-                ILLUSTRATION_CACHE[pid] = {
-                    "illustration_prompt": visual_prompt,
-                    "illustration_url": illustration_url
-                }
+                # Only update cache after file is successfully saved
+                if os.path.exists(image_path):
+                    ILLUSTRATION_CACHE[pid] = {
+                        "illustration_prompt": visual_prompt,
+                        "illustration_url": illustration_url
+                    }
+                    print(f"[Background Illustration Success]: Image saved to {image_path}")
+                else:
+                    print(f"[Background Illustration Error]: File not found at {image_path}")
             except Exception as e:
                 print(f"[Background Illustration Error]: {e}")
         

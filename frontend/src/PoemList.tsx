@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import PromptForm from './PromptForm';
 
 export type Poem = {
   id: string;
@@ -9,24 +11,80 @@ interface PoemListProps {
   poems: Poem[];
   selectedPoemId?: string;
   onPoemClick?: (id: string) => void;
+  onPoemGenerated?: (prompt: string) => void;
+  isGenerating?: boolean;
 }
 
-const PoemList = ({ poems, selectedPoemId, onPoemClick }: PoemListProps) => {
+const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGenerating }: PoemListProps) => {
+  const [activeTab, setActiveTab] = useState<'classic' | 'new'>('classic');
+
+  // Filter poems by type
+  const classicPoems = poems.filter(poem => Number(poem.id) <= 252);
+  const newPoems = poems.filter(poem => Number(poem.id) > 252);
+
+  // Wrapper function to handle prompt submission
+  const handlePromptSubmit = (prompt: string) => {
+    if (onPoemGenerated) {
+      onPoemGenerated(prompt);
+    }
+  };
+
+  const renderPoemList = (poemList: Poem[]) => (
+    <div className="archive-list">
+      {poemList.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+          No poems yet
+        </div>
+      ) : (
+        poemList.map((poem) => (
+          <Link
+            key={String(poem.id)}
+            to={`/poem/${poem.id}`}
+            className={`archive-poem-item${String(selectedPoemId) === String(poem.id) ? ' selected' : ''}`}
+            onClick={() => onPoemClick && onPoemClick(String(poem.id))}
+          >
+            <div className="archive-poem-title">{poem.title}</div>
+            <div className="archive-poem-id">#{poem.id}</div>
+          </Link>
+        ))
+      )}
+    </div>
+  );
+
   return (
     <div className="archive-container">
-      <div className="archive-list">
-        {poems.length === 0 ? null : (
-          poems.map((poem) => (
-            <Link
-              key={String(poem.id)}
-              to={`/poem/${poem.id}`}
-              className={`archive-poem-item${String(selectedPoemId) === String(poem.id) ? ' selected' : ''}`}
-              onClick={() => onPoemClick && onPoemClick(String(poem.id))}
-            >
-              <div className="archive-poem-title">{poem.title}</div>
-              <div className="archive-poem-id">#{poem.id}</div>
-            </Link>
-          ))
+      {/* Title */}
+      <div className="poems-title">
+        J.D. Evans Poems
+      </div>
+      
+      {/* Tab Navigation */}
+      <div className="tab-navigation">
+        <button
+          className={`tab-button ${activeTab === 'classic' ? 'active' : ''}`}
+          onClick={() => setActiveTab('classic')}
+        >
+          Classic
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'new' ? 'active' : ''}`}
+          onClick={() => setActiveTab('new')}
+        >
+          New
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="tab-content">
+        {activeTab === 'classic' ? (
+          renderPoemList(classicPoems)
+        ) : (
+          <div className="new-tab-content">
+            <PromptForm onSubmit={handlePromptSubmit} isLoading={isGenerating} />
+            <div style={{ marginTop: '24px' }}>
+              {renderPoemList(newPoems)}
+            </div>
+          </div>
         )}
       </div>
     </div>

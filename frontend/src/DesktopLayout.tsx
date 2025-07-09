@@ -61,8 +61,12 @@ const DesktopLayout = ({ poems, onPoemGenerated }: DesktopLayoutProps) => {
   return (
     <div className="layout">
       <div className="left-column">
-        <PromptForm onSubmit={handlePromptSubmit} isLoading={isGenerating} />
-        <PoemList poems={poems} selectedPoemId={selectedPoemId} />
+        <PoemList 
+          poems={poems} 
+          selectedPoemId={selectedPoemId} 
+          onPoemGenerated={handlePromptSubmit}
+          isGenerating={isGenerating}
+        />
       </div>
       <div className="right-column">
         <Routes>
