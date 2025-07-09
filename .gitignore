@@ -25,3 +25,5 @@ logs/
 *.njsproj
 *.sln
 *.sw?
+
+backend/static/images/*.png
