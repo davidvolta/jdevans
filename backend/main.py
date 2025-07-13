@@ -146,7 +146,7 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     return poem_json
 
 def extract_visual_prompt(poem_body: str) -> str:
-    system_msg = "Describe the main scene from this poem in one or two sentences. Include the setting, key objects, and main action. Write it as a complete scene description, not a list. Example: 'A person sits at a kitchen table reading a newspaper with a coffee cup and morning sunlight streaming through the window' or 'A cyclist rides down a park path covered in autumn leaves'. Focus on what can be drawn."
+    system_msg = "Describe the main scene from this poem in simple, cartoon-friendly terms. Avoid photographic details like lighting, colors, or mood descriptions. Use basic nouns and actions. Example: 'person sits at kitchen table with newspaper and coffee cup' or 'cyclist rides on park path with fallen leaves'. Keep it simple and drawable."
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -162,8 +162,9 @@ def extract_visual_prompt(poem_body: str) -> str:
     return visual_prompt
 
 def combine_with_style(scene: str) -> str:
-    style = "Black and white pen and ink cartoon illustration, bold thick black lines, solid black fills, clean composition, high contrast, simple shading, minimal background detail, very little cross-hatching or stippling, whimsical humor, friendly cartoon style"
-    full_prompt = f"{scene}. {style}."
+    # Stability AI best practice: style directive first with emphasis, then content
+    style = "(black and white cartoon illustration:1.3), pen and ink style, bold lines, simple shading"
+    full_prompt = f"{style}, {scene}"
     print(f"[DEBUG] Full image prompt: {full_prompt}")
     return full_prompt
 
