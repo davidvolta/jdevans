@@ -13,14 +13,12 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
   const poem = poems.find((p) => String(p.id) === id);
   const [imageError, setImageError] = useState<boolean>(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
-  const [imageGenerationError, setImageGenerationError] = useState<string | null>(null);
   const [isLoadingPoem, setIsLoadingPoem] = useState<boolean>(false);
   const [imageKey, setImageKey] = useState<number>(0);
 
   // Reset image error state when poem changes
   useEffect(() => {
     setImageError(false);
-    setImageGenerationError(null);
     setIsLoadingPoem(true);
     setImageKey(0);
   }, [id]);
@@ -37,53 +35,38 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
     window.scrollTo(0, 0);
   }, [id]);
 
-  const handleGenerateImage = async () => {
-    if (!poem || isGeneratingImage) return;
+  // Auto-poll for image when poem loads (only for new poems that might be generating)
+  useEffect(() => {
+    if (!poem?.id) return;
     
-    setIsGeneratingImage(true);
-    setImageGenerationError(null);
-    
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/regenerate-illustration/${poem.id}`, {
-        method: 'POST',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to start image generation');
-      }
-      
-      // Poll for completion
-      const pollForCompletion = async () => {
-        try {
-          const checkResponse = await fetch(`${apiUrl}/illustration?poem_id=${poem.id}`);
-          const checkData = await checkResponse.json();
-          
-          if (checkData.status === 'ready') {
-            setIsGeneratingImage(false);
-            setImageError(false);
-            // Add a small delay to ensure file is fully written
-            setTimeout(() => {
-              setImageKey(Date.now());
-            }, 500);
-          } else if (checkData.status === 'pending') {
-            setTimeout(pollForCompletion, 2000); // Poll every 2 seconds
-          } else {
-            throw new Error('Image generation failed');
-          }
-        } catch (error) {
+    const checkForImage = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/illustration?poem_id=${poem.id}`);
+        const data = await response.json();
+        
+        if (data.status === 'ready') {
           setIsGeneratingImage(false);
-          setImageGenerationError(error instanceof Error ? error.message : 'Failed to check image status');
+          setImageError(false);
+          setImageKey(Date.now());
+        } else if (data.status === 'pending') {
+          setIsGeneratingImage(true);
+          setTimeout(checkForImage, 2000); // Poll every 2 seconds
+        } else {
+          // No image exists and none is being generated - this is fine for older poems
+          setIsGeneratingImage(false);
         }
-      };
-      
-      setTimeout(pollForCompletion, 2000); // Start polling after 2 seconds
-      
-    } catch (error) {
-      setIsGeneratingImage(false);
-      setImageGenerationError(error instanceof Error ? error.message : 'Failed to generate image');
+      } catch (error) {
+        setIsGeneratingImage(false);
+      }
+    };
+    
+    // Check if image exists first, only poll if there's active generation
+    const imageExists = !imageError;
+    if (!imageExists) {
+      checkForImage();
     }
-  };
+  }, [poem?.id, imageError]);
 
   // Show loading state if we're generating and this is the generating poem
   if (isGenerating && generatingPoemId === id) {
@@ -137,28 +120,17 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
           </div>
         )}
         
-        {/* Show generate image button if no image or image failed to load */}
-        {(!poem.id || imageError) && (
+        {/* Show loading message if image is being generated (only for new poems) */}
+        {isGeneratingImage && (
           <div className="generate-image-section">
-            {imageGenerationError && (
-              <div className="error" style={{ marginBottom: '1em' }}>
-                {imageGenerationError}
+            <div className="creating-image">
+              <span>Creating image</span>
+              <div className="dots">
+                <span className="dot dot1">.</span>
+                <span className="dot dot2">.</span>
+                <span className="dot dot3">.</span>
               </div>
-            )}
-            <button
-              className="generate-image-button"
-              onClick={handleGenerateImage}
-              disabled={isGeneratingImage}
-            >
-              {isGeneratingImage ? (
-                <>
-                  <div className="spinner" style={{ width: '16px', height: '16px', marginRight: '8px', display: 'inline-block' }}></div>
-                  Adding Image...
-                </>
-              ) : (
-                'Add Image'
-              )}
-            </button>
+            </div>
           </div>
         )}
         

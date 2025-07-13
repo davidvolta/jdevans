@@ -43,8 +43,8 @@ npm run preview      # Preview production build
 
 **Backend (run from `backend/` directory):**
 ```bash
-pip install -r requirements.txt    # Install Python dependencies
-python main.py                     # Start FastAPI server
+# IMPORTANT: Always use the venv's Python 3.8, NOT system Python 2.7
+./venv/bin/python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000    # Start FastAPI server
 ```
 
 **Full Build Process:**
@@ -54,9 +54,9 @@ python main.py                     # Start FastAPI server
 
 ## Environment Setup
 
-- Backend requires OpenAI API key in `.env` file
+- Backend requires OpenAI API key and Stability API key in `.env` file
 - Frontend uses `VITE_API_URL` environment variable for API endpoint
-- Python virtual environment recommended: `backend/venv/`
+- **CRITICAL**: System has Python 2.7 default, but venv contains Python 3.8. Always use `./venv/bin/python` directly, never `python` or `source venv/bin/activate`
 
 ## Key Files
 
@@ -73,3 +73,10 @@ The core poetry generation uses a sophisticated similarity-based approach:
 2. Cosine similarity finds the 3 most similar poems from the sample collection
 3. GPT-4-turbo generates new poems using these similar poems as style examples
 4. All poems include the signature J.D. Evans biographical line format
+
+## Quick Commands
+
+**Git Push:** When user says `push "commit message"`, run:
+```bash
+./push.sh "commit message"
+```
