@@ -146,7 +146,7 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     return poem_json
 
 def extract_visual_prompt(poem_body: str) -> str:
-    system_msg = "Extract the main scene or central moment from this poem for illustration. Focus on the key action, situation, or moment that captures the poem's essence. Include the main character(s) involved, their activity or situation, their emotional state, and the relevant setting. Describe what's actually happening in the poem, not just a generic person. Keep it focused but capture the poem's specific content and mood."
+    system_msg = "Extract the concrete objects and setting from this poem. List only the physical things, places, and actions mentioned. Use simple nouns and verbs. Example: 'kitchen table, coffee cup, morning sunlight through window, person reading newspaper' or 'bicycle, park path, autumn leaves, rider pedaling'. Keep it factual and concrete."
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -162,8 +162,8 @@ def extract_visual_prompt(poem_body: str) -> str:
     return visual_prompt
 
 def combine_with_style(scene: str) -> str:
-    style = "Single character focused, clean white background or very simple background. A whimsical, humorous hand-drawn black-and-white, pen and ink cartoon illustration style inspired by playful 1980s American newspaper comics and funny gag panels. The artwork features bold thick black lines, solid black fills, clean composition, high contrast, simple shading, cheerful and expressive body language, silly facial expressions, and minimal background detail. Very little cross-hatching or stippling. Character proportions lean toward caricature with oversized heads, spindly limbs, and comically contorted poses that evoke warmth and humor. The composition is lighthearted and often framed like a single-panel funny editorial cartoon with a gentle, amusing tone."
-    full_prompt = f"{style}, {scene}"
+    style = "Black and white pen and ink cartoon illustration, bold thick black lines, solid black fills, clean composition, high contrast, simple shading, minimal background detail, very little cross-hatching or stippling, whimsical humor, friendly cartoon style"
+    full_prompt = f"{scene}, {style}"
     print(f"[DEBUG] Full image prompt: {full_prompt}")
     return full_prompt
 
