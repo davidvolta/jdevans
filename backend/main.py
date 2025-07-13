@@ -146,7 +146,7 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     return poem_json
 
 def extract_visual_prompt(poem_body: str) -> str:
-    system_msg = "Extract the concrete objects and setting from this poem. List only the physical things, places, and actions mentioned. Use simple nouns and verbs. Example: 'kitchen table, coffee cup, morning sunlight through window, person reading newspaper' or 'bicycle, park path, autumn leaves, rider pedaling'. Keep it factual and concrete."
+    system_msg = "Describe the main scene from this poem in one or two sentences. Include the setting, key objects, and main action. Write it as a complete scene description, not a list. Example: 'A person sits at a kitchen table reading a newspaper with a coffee cup and morning sunlight streaming through the window' or 'A cyclist rides down a park path covered in autumn leaves'. Focus on what can be drawn."
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -163,7 +163,7 @@ def extract_visual_prompt(poem_body: str) -> str:
 
 def combine_with_style(scene: str) -> str:
     style = "Black and white pen and ink cartoon illustration, bold thick black lines, solid black fills, clean composition, high contrast, simple shading, minimal background detail, very little cross-hatching or stippling, whimsical humor, friendly cartoon style"
-    full_prompt = f"{scene}, {style}"
+    full_prompt = f"{scene}. {style}."
     print(f"[DEBUG] Full image prompt: {full_prompt}")
     return full_prompt
 
@@ -183,7 +183,7 @@ def generate_illustration(full_prompt: str) -> str:
     payload = {
         "text_prompts": [
             {"text": full_prompt, "weight": 1},
-            {"text": "busy background, detailed background, cluttered scene, complex background, noisy background, multiple characters, alien features, bizarre faces, distorted faces, weird proportions, monster, creature, non-human", "weight": -0.7}
+            {"text": "color, colored, full color, grey background, gray background, colored background, busy background, detailed background, cluttered scene, complex background, noisy background, multiple characters, alien features, bizarre faces, distorted faces, weird proportions, monster, creature, non-human", "weight": -0.9}
         ],
         "cfg_scale": 7,
         "height": 1024,
@@ -200,7 +200,7 @@ def generate_illustration(full_prompt: str) -> str:
         if "artifacts" not in response_data or len(response_data["artifacts"]) == 0:
             raise HTTPException(status_code=500, detail="No image artifacts in Stability AI response")
         
-        # Stability AI returns base64 encoded images, create a data URL
+        # SDXL returns base64 encoded images in artifacts array
         import base64
         
         image_data = response_data["artifacts"][0]["base64"]
