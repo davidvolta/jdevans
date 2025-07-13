@@ -146,7 +146,7 @@ def generate_poem_with_openai(prompt: str, similar_poems: List[str]) -> dict:
     return poem_json
 
 def extract_visual_prompt(poem_body: str) -> str:
-    system_msg = "Describe the main scene from this poem in simple, cartoon-friendly terms. Avoid photographic details like lighting, colors, or mood descriptions. Use basic nouns and actions. Example: 'person sits at kitchen table with newspaper and coffee cup' or 'cyclist rides on park path with fallen leaves'. Keep it simple and drawable."
+    system_msg = "Break down the main scene from this poem into comma-separated visual elements. Format as: 'setting/location, key objects, main action/character, expression/detail'. Use simple nouns and adjectives. Example: 'kitchen table, newspaper and coffee cup, person reading, relaxed morning expression' or 'park path, fallen leaves, cyclist pedaling, focused concentration'. Keep each element brief and drawable."
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -158,13 +158,12 @@ def extract_visual_prompt(poem_body: str) -> str:
     if content is None:
         raise HTTPException(status_code=500, detail="Failed to generate visual prompt")
     visual_prompt = content.strip()
-    print(f"[DEBUG] Visual prompt extracted: {visual_prompt}")
     return visual_prompt
 
 def combine_with_style(scene: str) -> str:
-    # Stability AI best practice: style directive first with emphasis, then content
-    style = "(black and white cartoon illustration:1.3), pen and ink style, bold lines, simple shading"
-    full_prompt = f"{style}, {scene}"
+    # Clean comma-separated format for better SD parsing
+    style = "(black and white cartoon illustration:1.3), pen and ink style, bold uneven linework, simple shading"
+    full_prompt = f"{style},\n{scene}"
     print(f"[DEBUG] Full image prompt: {full_prompt}")
     return full_prompt
 
@@ -184,11 +183,11 @@ def generate_illustration(full_prompt: str) -> str:
     payload = {
         "text_prompts": [
             {"text": full_prompt, "weight": 1},
-            {"text": "color, colored, full color, grey background, gray background, colored background, busy background, detailed background, cluttered scene, complex background, noisy background, multiple characters, alien features, bizarre faces, distorted faces, weird proportions, monster, creature, non-human", "weight": -0.9}
+            {"text": "color, colored, full color, grey background, gray background, colored background, busy background, detailed background, cluttered scene, complex background, noisy background, alien features, bizarre faces, distorted faces, weird proportions, monster, creature, non-human", "weight": -0.9}
         ],
         "cfg_scale": 7,
-        "height": 1024,
-        "width": 1024,
+        "height": 896,
+        "width": 1152,
         "samples": 1,
         "steps": 30
     }
