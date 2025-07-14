@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./venv/bin/uvicorn main:app --reload --port 8000)",
+      "Bash(source:*)",
+      "Bash(uvicorn:*)",
+      "Bash(python:*)",
+      "Bash(./venv/bin/python:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(chmod:*)",
+      "Bash(npm run build:*)",
+      "Bash(./push.sh:*)"
+    ],
+    "deny": []
+  }
+}

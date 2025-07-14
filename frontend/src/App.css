@@ -506,6 +506,10 @@ body, html {
   .poem-body {
     font-size: 18px !important;
   }
+  
+  .back-button-mobile {
+    display: block !important;
+  }
 }
 
 /* Poems Title */

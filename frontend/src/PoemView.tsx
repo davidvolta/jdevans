@@ -105,6 +105,10 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
     return null;
   }
 
+  const handleBackClick = () => {
+    window.history.back();
+  };
+
   return (
     <div className={`poem-display${poem.id && !imageError ? ' has-top-image' : ''}`}>
       <div className="poem-strip-inner">
@@ -137,6 +141,10 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
         <div className="poem-title">{poem.title}</div>
         <div className="poem-body">{poem.content}</div>
         {poem.signature && <div className="poem-signature">{poem.signature}</div>}
+        
+        <button className="new-poem-button back-button-mobile" onClick={handleBackClick} style={{ marginTop: '2em', maxWidth: '400px', display: 'none' }}>
+          Back to Poems
+        </button>
       </div>
     </div>
   );
