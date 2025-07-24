@@ -315,6 +315,24 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
 
 @app.get("/illustration")
 async def get_illustration(poem_id: str):
+    # Check if this is a classic poem by looking it up in poems.json
+    try:
+        with open(poems_path, "r") as f:
+            poems = json.load(f)
+        
+        # Find the poem by ID
+        poem = next((p for p in poems if str(p["id"]) == str(poem_id)), None)
+        if poem and poem.get("type") == "classic":
+            return {"status": "classic"}
+    except Exception as e:
+        print(f"Error checking poem type: {e}")
+        # Continue to check for existing images even if type check fails
+    
+    # Check if image file already exists on disk
+    image_path = os.path.join(base_dir, "static", "images", f"{poem_id}.png")
+    if os.path.exists(image_path):
+        return {"status": "ready", "illustration_url": f"/static/images/{poem_id}.png"}
+    
     if poem_id not in ILLUSTRATION_CACHE:
         return {"status": "pending"}
     return {"status": "ready", **ILLUSTRATION_CACHE[poem_id]}
