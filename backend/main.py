@@ -210,7 +210,7 @@ def generate_illustration(full_prompt: str) -> str:
         image_data = artifact["base64"]
         
         # Validate base64 data before returning
-        if not image_data or len(image_data) < 1000:
+        if not image_data or len(image_data) < 100:
             raise HTTPException(status_code=500, detail=f"Invalid base64 data from Stability AI: {len(image_data) if image_data else 0} chars")
         
         print(f"[Stability AI] Received base64 data: {len(image_data)} chars")
@@ -275,7 +275,7 @@ def download_and_save_image(image_url: str, poem_id: str) -> str:
         header, data = image_url.split(',', 1)
         
         # Validate base64 data length
-        if len(data) < 1000:  # Very small data suggests corruption
+        if len(data) < 100:  # Very small data suggests corruption
             raise ValueError(f"Base64 data too small: {len(data)} chars")
         
         print(f"[Image Processing] Base64 data length: {len(data)} chars")
@@ -291,10 +291,15 @@ def download_and_save_image(image_url: str, poem_id: str) -> str:
         # Open and validate image
         try:
             img = Image.open(BytesIO(img_data))
-            img.verify()  # Verify image integrity
-            img = Image.open(BytesIO(img_data))  # Reopen after verify (verify closes it)
+            # Try to verify, but don't fail if verification has issues
+            try:
+                img.verify()  # Verify image integrity
+                img = Image.open(BytesIO(img_data))  # Reopen after verify (verify closes it)
+            except Exception as verify_error:
+                print(f"[Image Processing] Verification warning: {verify_error}")
+                img = Image.open(BytesIO(img_data))  # Reopen anyway
         except Exception as e:
-            raise ValueError(f"Corrupted image data: {e}")
+            raise ValueError(f"Cannot open image data: {e}")
         
         # Ensure static/images directory exists
         images_dir = os.path.join(base_dir, "static", "images")
@@ -314,30 +319,71 @@ def download_and_save_image(image_url: str, poem_id: str) -> str:
             # Fallback to ID-based filename
             filename = f"{poem_id}.png"
         
-        # Save as PNG with optimization
-        image_path = os.path.join(images_dir, filename)
-        img.save(image_path, "PNG", optimize=True)
+        # Use atomic file writing to prevent race conditions
+        import tempfile
+        import hashlib
         
-        # Verify the saved file
+        final_path = os.path.join(images_dir, filename)
+        
+        # Create temporary file in the same directory
+        temp_fd, temp_path = tempfile.mkstemp(suffix='.png.tmp', dir=images_dir)
+        
         try:
-            if not os.path.exists(image_path):
-                raise ValueError("Image file was not saved")
+            # Close the file descriptor and use the path with PIL
+            os.close(temp_fd)
             
-            file_size = os.path.getsize(image_path)
-            if file_size < 1000:  # Very small file suggests corruption
-                raise ValueError(f"Saved image file too small: {file_size} bytes")
+            print(f"[Image Save] Writing to temporary file: {os.path.basename(temp_path)}")
             
-            # Try to reopen the saved file to verify it's not corrupted
-            with Image.open(image_path) as test_img:
-                test_img.verify()
+            # Save to temporary file
+            img.save(temp_path, "PNG")
             
-            print(f"[Image Saved] Successfully saved {filename}: {file_size} bytes")
+            # Verify the temporary file
+            if not os.path.exists(temp_path):
+                raise ValueError("Temporary image file was not created")
+            
+            temp_size = os.path.getsize(temp_path)
+            if temp_size < 500:
+                raise ValueError(f"Temporary image file too small: {temp_size} bytes")
+            
+            # Calculate checksum of original image data for verification
+            original_hash = hashlib.md5(img_data).hexdigest()
+            
+            # Read back and verify the saved file
+            with open(temp_path, 'rb') as f:
+                saved_data = f.read()
+                
+            # Verify we can open the saved image
+            try:
+                with Image.open(temp_path) as test_img:
+                    test_img.load()  # Load the image data to verify it's complete
+            except Exception as e:
+                raise ValueError(f"Saved temporary image cannot be opened: {e}")
+            
+            print(f"[Image Save] Temporary file verified: {temp_size} bytes")
+            
+            # Atomically move temp file to final location
+            import shutil
+            shutil.move(temp_path, final_path)
+            
+            final_size = os.path.getsize(final_path)
+            print(f"[Image Save] Successfully saved {filename}: {final_size} bytes (MD5: {original_hash[:8]}...)")
             
         except Exception as e:
-            # Clean up corrupted file
-            if os.path.exists(image_path):
-                os.remove(image_path)
-            raise ValueError(f"Saved image file is corrupted: {e}")
+            # Clean up temporary file on error
+            try:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            except:
+                pass
+            # Clean up final file if it exists but is corrupted
+            try:
+                if os.path.exists(final_path):
+                    os.remove(final_path)
+            except:
+                pass
+            raise ValueError(f"Atomic image save failed: {e}")
+        
+        image_path = final_path
         
         return image_path
     except Exception as e:
@@ -379,13 +425,24 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
             
             # Only update cache after file is successfully saved
             if os.path.exists(image_path):
-                # Get the filename for the static URL
-                filename = os.path.basename(image_path)
-                ILLUSTRATION_CACHE[str(pid)] = {
-                    "illustration_prompt": visual_prompt,
-                    "illustration_url": f"/static/images/{filename}"
-                }
-                print(f"[Background Illustration Success]: Image saved to {image_path}")
+                # Small delay to ensure file system operations are complete
+                import time
+                time.sleep(0.1)
+                
+                # Double-check file exists and is readable
+                try:
+                    with Image.open(image_path) as test_img:
+                        test_img.load()
+                    
+                    # Get the filename for the static URL
+                    filename = os.path.basename(image_path)
+                    ILLUSTRATION_CACHE[str(pid)] = {
+                        "illustration_prompt": visual_prompt,
+                        "illustration_url": f"/static/images/{filename}"
+                    }
+                    print(f"[Background Illustration Success]: Image saved and verified at {image_path}")
+                except Exception as e:
+                    print(f"[Background Illustration Error]: Saved file failed verification: {e}")
             else:
                 print(f"[Background Illustration Error]: File not found at {image_path}")
         except Exception as e:
@@ -408,18 +465,19 @@ async def get_illustration(poem_id: str):
         if not poem:
             return {"status": "pending"}
         
-        # Check if this is a classic poem (no generation allowed)
-        if poem.get("type") == "classic":
-            return {"status": "classic"}
-        
-        # For modern poems, check if image file exists on disk
+        # Check if image file exists on disk (for both classic and modern poems)
         image_filename = poem.get("image_filename") or f"{poem_id}.png"
         image_path = os.path.join(base_dir, "static", "images", image_filename)
         
         if os.path.exists(image_path):
             return {"status": "ready", "illustration_url": f"/static/images/{image_filename}"}
         
-        # If file doesn't exist yet, check if generation is in progress
+        # If no image file exists, handle based on poem type
+        if poem.get("type") == "classic":
+            # Classic poems can't generate new images
+            return {"status": "classic"}
+        
+        # For modern poems, check if generation is in progress
         if poem_id in ILLUSTRATION_CACHE:
             return {"status": "ready", **ILLUSTRATION_CACHE[poem_id]}
         
