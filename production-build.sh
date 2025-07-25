@@ -3,8 +3,10 @@ set -o errexit  # Exit on error
 
 echo "🚀 Building for PRODUCTION (preserving user poems)..."
 
-# Check if we're in production environment
-if [ "$ENV" != "production" ]; then
+# Check if we're in a CI/CD environment (skip interactive prompt)
+if [ -n "$CI" ] || [ -n "$RENDER" ] || [ -n "$GITHUB_ACTIONS" ] || [ -n "$VERCEL" ] || [ "$ENV" = "production" ]; then
+    echo "✅ Detected CI/CD environment - proceeding with production build"
+elif [ "$ENV" != "production" ]; then
     echo "⚠️  Warning: This script is intended for production deployment."
     echo "⚠️  It will NOT reset poems.json and will preserve user-generated content."
     echo "⚠️  For local development, use ./local-build.sh instead."
