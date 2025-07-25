@@ -215,6 +215,20 @@ def generate_illustration(full_prompt: str) -> str:
         print(f"Unexpected error in Stability AI generation: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to generate illustration: {str(e)}")
 
+def generate_image_filename(title: str) -> str:
+    """Convert poem title to URL-safe filename slug"""
+    import re
+    # Convert to lowercase
+    slug = title.lower()
+    # Replace spaces and punctuation with hyphens
+    slug = re.sub(r'[^\w\s-]', '', slug)  # Remove punctuation except hyphens
+    slug = re.sub(r'[-\s]+', '-', slug)   # Replace spaces and multiple hyphens with single hyphen
+    # Remove leading/trailing hyphens and ensure max length
+    slug = slug.strip('-')[:50]  # Limit to 50 chars
+    # Remove trailing hyphen if exists
+    slug = slug.rstrip('-')
+    return f"{slug}.png"
+
 def save_user_poem(poem_data: dict, prompt: str):
     # Get the next ID by finding the highest existing ID and adding 1
     try:
@@ -230,7 +244,9 @@ def save_user_poem(poem_data: dict, prompt: str):
         "title": poem_data["title"],
         "content": poem_data["body"],  # Note: existing poems use "content" not "body"
         "signature": poem_data["signature"],
-        "prompt": prompt
+        "prompt": prompt,
+        "type": "modern",
+        "image_filename": generate_image_filename(poem_data["title"])
     }
 
     poems.append(user_poem)
@@ -367,9 +383,9 @@ async def get_poems():
     try:
         with open(poems_path, "r") as f:
             poems = json.load(f)
-        # Return poems in reverse order (newest first)
-        poems_reversed = list(reversed(poems))
-        return {"poems": poems_reversed}
+        # Return poems sorted by ID in descending order (newest first)
+        poems_sorted = sorted(poems, key=lambda p: p["id"], reverse=True)
+        return {"poems": poems_sorted}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load poems: {str(e)}")
 

@@ -36,6 +36,8 @@ const MobileLayout = ({ poems, onPoemGenerated, onPoemUpdated, onPoemRemoved }: 
         title: 'Generating...',
         content: 'J.D. Evans is writing your poem...',
         signature: '',
+        type: 'modern' as const,
+        image_filename: 'generating.png',
       };
       
       // Add the loading poem to the list immediately
@@ -65,6 +67,8 @@ const MobileLayout = ({ poems, onPoemGenerated, onPoemUpdated, onPoemRemoved }: 
         title: data.title,
         content: data.body,
         signature: data.signature,
+        type: 'modern' as const,
+        image_filename: data.image_filename || `${nextIdStr}.png`,
       };
       
       // Replace the loading poem with the real one

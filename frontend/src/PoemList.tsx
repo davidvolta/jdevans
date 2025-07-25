@@ -21,7 +21,7 @@ interface PoemListProps {
 const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGenerating, activeTab = 'classic', onTabChange }: PoemListProps) => {
 
   // Filter poems by type
-  const classicPoems = poems.filter(poem => poem.type === 'classic').reverse();
+  const classicPoems = poems.filter(poem => poem.type === 'classic');
   const newPoems = poems.filter(poem => poem.type === 'modern');
 
   // Wrapper function to handle prompt submission
