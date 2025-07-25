@@ -26,4 +26,3 @@ logs/
 *.sln
 *.sw?
 
-backend/static/images/*.png
