@@ -328,9 +328,11 @@ async def generate_poem(request: GenerateRequest, background_tasks: BackgroundTa
             
             # Only update cache after file is successfully saved
             if os.path.exists(image_path):
+                # Get the filename for the static URL
+                filename = os.path.basename(image_path)
                 ILLUSTRATION_CACHE[str(pid)] = {
                     "illustration_prompt": visual_prompt,
-                    "illustration_url": illustration_url
+                    "illustration_url": f"/static/images/{filename}"
                 }
                 print(f"[Background Illustration Success]: Image saved to {image_path}")
             else:
@@ -352,30 +354,30 @@ async def get_illustration(poem_id: str):
         
         # Find the poem by ID
         poem = next((p for p in poems if str(p["id"]) == str(poem_id)), None)
+        if not poem:
+            return {"status": "pending"}
         
-        # First priority: Check if poem has image filename and file exists
-        if poem and poem.get("image_filename"):
-            image_path = os.path.join(base_dir, "static", "images", poem["image_filename"])
-            if os.path.exists(image_path):
-                return {"status": "ready", "illustration_url": f"/static/images/{poem['image_filename']}"}
-        
-        # Second priority: Fallback to ID-based filename (for backward compatibility)
-        image_path = os.path.join(base_dir, "static", "images", f"{poem_id}.png")
-        if os.path.exists(image_path):
-            return {"status": "ready", "illustration_url": f"/static/images/{poem_id}.png"}
-        
-        # Third priority: Check if this is a classic poem (no generation allowed)
-        if poem and poem.get("type") == "classic":
+        # Check if this is a classic poem (no generation allowed)
+        if poem.get("type") == "classic":
             return {"status": "classic"}
+        
+        # For modern poems, check if image file exists on disk
+        image_filename = poem.get("image_filename") or f"{poem_id}.png"
+        image_path = os.path.join(base_dir, "static", "images", image_filename)
+        
+        if os.path.exists(image_path):
+            return {"status": "ready", "illustration_url": f"/static/images/{image_filename}"}
+        
+        # If file doesn't exist yet, check if generation is in progress
+        if poem_id in ILLUSTRATION_CACHE:
+            return {"status": "ready", **ILLUSTRATION_CACHE[poem_id]}
+        
+        # Image generation hasn't started or completed yet
+        return {"status": "pending"}
             
     except Exception as e:
         print(f"Error checking poem: {e}")
-        # Continue to check cache if file operations fail
-    
-    # Fourth priority: Check generation cache for modern poems
-    if poem_id not in ILLUSTRATION_CACHE:
         return {"status": "pending"}
-    return {"status": "ready", **ILLUSTRATION_CACHE[poem_id]}
 
 @app.get("/poems")
 async def get_poems():
