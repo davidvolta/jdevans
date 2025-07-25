@@ -21,18 +21,29 @@ fi
 echo "📋 Copying ORIGINAL_poems.json to poems.json..."
 cp ORIGINAL_poems.json poems.json
 
-# Remove images with IDs 253 or greater
-echo "🖼️  Removing images with IDs 253 or greater..."
+# Remove images for modern poems (check poems.json for type)
+echo "🖼️  Removing images for modern poems..."
 if [ -d "static/images" ]; then
+    # Use Python to get list of modern poem IDs
+    modern_ids=$(./venv/bin/python3 -c "
+import json
+try:
+    with open('poems.json', 'r') as f:
+        poems = json.load(f)
+    modern_ids = [str(p['id']) for p in poems if p.get('type') == 'modern']
+    print(' '.join(modern_ids))
+except:
+    print('')  # If error, print nothing
+")
+    
     for file in static/images/*.png; do
         if [ -f "$file" ]; then
-            # Extract the number from filename (e.g., "253.png" -> "253")
             filename=$(basename "$file")
             number=$(echo "$filename" | sed 's/\.png$//')
             
-            # Check if it's a number and >= 253
-            if [[ "$number" =~ ^[0-9]+$ ]] && [ "$number" -ge 253 ]; then
-                echo "🗑️  Removing image: $filename"
+            # Check if this number is in the modern_ids list
+            if echo "$modern_ids" | grep -w "$number" > /dev/null; then
+                echo "🗑️  Removing modern poem image: $filename"
                 rm "$file"
             fi
         fi

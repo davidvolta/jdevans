@@ -14,13 +14,13 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
   const [imageError, setImageError] = useState<boolean>(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [isLoadingPoem, setIsLoadingPoem] = useState<boolean>(false);
-  const [imageKey, setImageKey] = useState<number>(0);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  // Reset image error state when poem changes
+  // Reset states when poem changes
   useEffect(() => {
     setImageError(false);
     setIsLoadingPoem(true);
-    setImageKey(0);
+    setImageUrl(null);
   }, [id]);
 
   // Clear loading state when poem is found
@@ -48,25 +48,28 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
         if (data.status === 'ready') {
           setIsGeneratingImage(false);
           setImageError(false);
-          setImageKey(Date.now());
+          setImageUrl(data.illustration_url);
         } else if (data.status === 'pending') {
           setIsGeneratingImage(true);
+          setImageUrl(null);
           setTimeout(checkForImage, 2000); // Poll every 2 seconds
+        } else if (data.status === 'classic') {
+          // Classic poems don't get images generated
+          setIsGeneratingImage(false);
+          setImageUrl(null);
         } else {
           // No image exists and none is being generated - this is fine for older poems
           setIsGeneratingImage(false);
+          setImageUrl(null);
         }
       } catch (error) {
         setIsGeneratingImage(false);
       }
     };
     
-    // Check if image exists first, only poll if there's active generation
-    const imageExists = !imageError;
-    if (!imageExists) {
-      checkForImage();
-    }
-  }, [poem?.id, imageError]);
+    // Always check for image when poem loads
+    checkForImage();
+  }, [poem?.id]);
 
   // Show loading state if we're generating and this is the generating poem
   if (isGenerating && generatingPoemId === id) {
@@ -110,13 +113,12 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
   };
 
   return (
-    <div className={`poem-display${poem.id && !imageError ? ' has-top-image' : ''}`}>
+    <div className={`poem-display${poem.id && imageUrl && !imageError ? ' has-top-image' : ''}`}>
       <div className="poem-strip-inner">
-        {poem.id && !imageError && (
+        {poem.id && imageUrl && !imageError && (
           <div className="poem-image-container">
             <img 
-              key={imageKey}
-              src={`${import.meta.env.VITE_API_URL || ''}/static/images/${poem.id}.png?t=${imageKey}`}
+              src={`${import.meta.env.VITE_API_URL || ''}${imageUrl}`}
               alt={`Illustration for ${poem.title}`}
               className="poem-image"
               onError={() => setImageError(true)}

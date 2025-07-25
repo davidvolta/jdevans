@@ -4,6 +4,8 @@ import PromptForm from './PromptForm';
 export type Poem = {
   id: string;
   title: string;
+  type?: 'classic' | 'modern';
+  image_filename?: string;
 };
 
 interface PoemListProps {
@@ -19,8 +21,8 @@ interface PoemListProps {
 const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGenerating, activeTab = 'classic', onTabChange }: PoemListProps) => {
 
   // Filter poems by type
-  const classicPoems = poems.filter(poem => Number(poem.id) <= 252);
-  const newPoems = poems.filter(poem => Number(poem.id) > 252);
+  const classicPoems = poems.filter(poem => poem.type === 'classic').reverse();
+  const newPoems = poems.filter(poem => poem.type === 'modern');
 
   // Wrapper function to handle prompt submission
   const handlePromptSubmit = (prompt: string) => {
