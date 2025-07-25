@@ -15,7 +15,8 @@
       "Bash(npm run build:*)",
       "Bash(./push.sh:*)",
       "Bash(./backend/venv/bin/python3:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

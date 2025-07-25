@@ -203,7 +203,17 @@ def generate_illustration(full_prompt: str) -> str:
         # SDXL returns base64 encoded images in artifacts array
         import base64
         
-        image_data = response_data["artifacts"][0]["base64"]
+        artifact = response_data["artifacts"][0]
+        if "base64" not in artifact:
+            raise HTTPException(status_code=500, detail="No base64 data in Stability AI artifact")
+        
+        image_data = artifact["base64"]
+        
+        # Validate base64 data before returning
+        if not image_data or len(image_data) < 1000:
+            raise HTTPException(status_code=500, detail=f"Invalid base64 data from Stability AI: {len(image_data) if image_data else 0} chars")
+        
+        print(f"[Stability AI] Received base64 data: {len(image_data)} chars")
         
         # Return as data URL which can be processed by download_and_save_image
         return f"data:image/png;base64,{image_data}"
@@ -263,8 +273,28 @@ def download_and_save_image(image_url: str, poem_id: str) -> str:
         # Handle data URL from Stability AI
         import base64
         header, data = image_url.split(',', 1)
-        img_data = base64.b64decode(data)
-        img = Image.open(BytesIO(img_data))
+        
+        # Validate base64 data length
+        if len(data) < 1000:  # Very small data suggests corruption
+            raise ValueError(f"Base64 data too small: {len(data)} chars")
+        
+        print(f"[Image Processing] Base64 data length: {len(data)} chars")
+        
+        # Decode and validate
+        try:
+            img_data = base64.b64decode(data, validate=True)
+        except Exception as e:
+            raise ValueError(f"Invalid base64 data: {e}")
+        
+        print(f"[Image Processing] Decoded image data: {len(img_data)} bytes")
+        
+        # Open and validate image
+        try:
+            img = Image.open(BytesIO(img_data))
+            img.verify()  # Verify image integrity
+            img = Image.open(BytesIO(img_data))  # Reopen after verify (verify closes it)
+        except Exception as e:
+            raise ValueError(f"Corrupted image data: {e}")
         
         # Ensure static/images directory exists
         images_dir = os.path.join(base_dir, "static", "images")
@@ -284,9 +314,30 @@ def download_and_save_image(image_url: str, poem_id: str) -> str:
             # Fallback to ID-based filename
             filename = f"{poem_id}.png"
         
-        # Save as PNG
+        # Save as PNG with optimization
         image_path = os.path.join(images_dir, filename)
-        img.save(image_path, "PNG")
+        img.save(image_path, "PNG", optimize=True)
+        
+        # Verify the saved file
+        try:
+            if not os.path.exists(image_path):
+                raise ValueError("Image file was not saved")
+            
+            file_size = os.path.getsize(image_path)
+            if file_size < 1000:  # Very small file suggests corruption
+                raise ValueError(f"Saved image file too small: {file_size} bytes")
+            
+            # Try to reopen the saved file to verify it's not corrupted
+            with Image.open(image_path) as test_img:
+                test_img.verify()
+            
+            print(f"[Image Saved] Successfully saved {filename}: {file_size} bytes")
+            
+        except Exception as e:
+            # Clean up corrupted file
+            if os.path.exists(image_path):
+                os.remove(image_path)
+            raise ValueError(f"Saved image file is corrupted: {e}")
         
         return image_path
     except Exception as e:
