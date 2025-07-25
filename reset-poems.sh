@@ -25,7 +25,7 @@ cp ORIGINAL_poems.json poems.json
 echo "🖼️  Removing images for modern poems..."
 if [ -d "static/images" ]; then
     # Use Python to get list of modern poem IDs
-    modern_ids=$(./venv/bin/python3 -c "
+    modern_ids=$(python3 -c "
 import json
 try:
     with open('poems.json', 'r') as f:
