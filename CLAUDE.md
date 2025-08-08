@@ -44,7 +44,7 @@ npm run preview      # Preview production build
 **Backend (run from `backend/` directory):**
 ```bash
 # IMPORTANT: Always use the venv's Python 3.8, NOT system Python 2.7
-./venv/bin/python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000    # Start FastAPI server
+./venv/bin/python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000    # Start FastAPI server
 ```
 
 **Full Build Process:**

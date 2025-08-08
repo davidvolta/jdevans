@@ -26,7 +26,7 @@ app = FastAPI(title="J.D. Evans Poem Generator API")
 if os.getenv("ENV") != "production":
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],
+        allow_origins=["http://localhost:5173", "http://192.168.5.139:5173"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
