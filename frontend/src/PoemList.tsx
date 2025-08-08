@@ -62,18 +62,18 @@ const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGener
       
       {/* Tab Navigation */}
       <div className="tab-navigation">
-        <button
+        <div
           className={`tab-button ${activeTab === 'classic' ? 'active' : ''}`}
           onClick={() => onTabChange && onTabChange('classic')}
         >
-          Classic
-        </button>
-        <button
+          CLASSIC
+        </div>
+        <div
           className={`tab-button ${activeTab === 'new' ? 'active' : ''}`}
           onClick={() => onTabChange && onTabChange('new')}
         >
-          Modern
-        </button>
+          MODERN
+        </div>
       </div>
 
       {/* Tab Content */}
