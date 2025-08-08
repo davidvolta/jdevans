@@ -16,12 +16,21 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
   const [isLoadingPoem, setIsLoadingPoem] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+
   // Reset states when poem changes
   useEffect(() => {
     setImageError(false);
     setIsLoadingPoem(true);
     setImageUrl(null);
-  }, [id]);
+    
+    // If this is a modern poem and likely just created (high ID number), 
+    // start with spinner showing while we check
+    if (poem && poem.type === 'modern' && parseInt(poem.id) > 260) {
+      setIsGeneratingImage(true);
+    } else {
+      setIsGeneratingImage(false);
+    }
+  }, [id, poem]);
 
   // Clear loading state when poem is found
   useEffect(() => {
