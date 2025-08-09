@@ -17,7 +17,8 @@
       "Bash(./backend/venv/bin/python3:*)",
       "Bash(git log:*)",
       "Bash(rm:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

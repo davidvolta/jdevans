@@ -6,6 +6,7 @@ export type Poem = {
   title: string;
   type?: 'classic' | 'modern';
   image_filename?: string;
+  newsItem?: string | null;
 };
 
 interface PoemListProps {

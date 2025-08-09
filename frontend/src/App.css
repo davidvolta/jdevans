@@ -240,7 +240,7 @@ body, html {
 .poem-title {
   font-family: 'Baskervville SC', serif;
   font-weight: bold;
-  font-size: 1.3em;
+  font-size: 1.8em;
   margin-bottom: 1em;
   line-height: 1.1;
 }
@@ -411,6 +411,10 @@ body, html {
 @media (min-width: 769px) {
   .poem-strip-inner {
     max-width: 800px;
+  }
+  
+  .poem-title {
+    font-size: 1.8em;
   }
 }
 

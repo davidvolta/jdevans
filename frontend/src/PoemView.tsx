@@ -150,6 +150,11 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
         )}
         
         <div className="poem-title">{poem.title}</div>
+        {poem.newsItem && (
+          <div className="news-item" style={{ color: 'black', fontFamily: 'Cascadia Mono, monospace', fontSize: '14px', marginBottom: '1.5em', border: '1px solid #ccc', padding: '12px', whiteSpace: 'normal' }}>
+            <span style={{ fontWeight: '600' }}>News Item: </span><span style={{ fontWeight: '300' }}>{poem.newsItem}</span>
+          </div>
+        )}
         <div className="poem-body">{poem.content}</div>
         {poem.signature && <div className="poem-signature">{poem.signature}</div>}
         
