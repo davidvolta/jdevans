@@ -44,10 +44,23 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Auto-poll for image when poem loads (only for new poems that might be generating)
+  // Handle image loading - sync for classic poems, async for modern poems
   useEffect(() => {
     if (!poem?.id) return;
     
+    // For classic poems, check image_filename synchronously to avoid flash
+    if (poem.type === 'classic') {
+      setIsGeneratingImage(false);
+      if (poem.image_filename) {
+        setImageUrl(`/static/images/${poem.image_filename}`);
+        setImageError(false);
+      } else {
+        setImageUrl(null);
+      }
+      return;
+    }
+    
+    // For modern poems, use async API polling (flash is acceptable for new content)
     const checkForImage = async () => {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -62,12 +75,8 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
           setIsGeneratingImage(true);
           setImageUrl(null);
           setTimeout(checkForImage, 2000); // Poll every 2 seconds
-        } else if (data.status === 'classic') {
-          // Classic poems don't get images generated
-          setIsGeneratingImage(false);
-          setImageUrl(null);
         } else {
-          // No image exists and none is being generated - this is fine for older poems
+          // No image exists and none is being generated
           setIsGeneratingImage(false);
           setImageUrl(null);
         }
@@ -76,9 +85,9 @@ const PoemView = ({ poems, isGenerating = false, generatingPoemId = null }: Poem
       }
     };
     
-    // Always check for image when poem loads
+    // Only check API for modern poems
     checkForImage();
-  }, [poem?.id]);
+  }, [poem?.id, poem?.type, poem?.image_filename]);
 
   // Show loading state if we're generating and this is the generating poem
   if (isGenerating && generatingPoemId === id) {
