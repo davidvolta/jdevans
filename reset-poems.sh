@@ -53,4 +53,12 @@ else
 fi
 
 echo "✅ Poems reset complete!"
-echo "📊 Original poems restored: $(wc -l < poems.json) lines" 
+echo "📊 Original poems restored: $(wc -l < poems.json) lines"
+
+# Clear the illustration cache for local development
+echo "🧹 Clearing illustration cache..."
+if curl -s "http://localhost:8000/clear-cache" > /dev/null 2>&1; then
+    echo "✅ Illustration cache cleared successfully"
+else
+    echo "⚠️  Could not clear cache (server may not be running)"
+fi 

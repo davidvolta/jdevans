@@ -489,6 +489,14 @@ async def get_illustration(poem_id: str):
         print(f"Error checking poem: {e}")
         return {"status": "pending"}
 
+@app.get("/clear-cache")
+async def clear_cache():
+    """Clear the illustration cache - useful for local development after reset"""
+    global ILLUSTRATION_CACHE
+    cache_size = len(ILLUSTRATION_CACHE)
+    ILLUSTRATION_CACHE.clear()
+    return {"message": f"Cache cleared. Removed {cache_size} entries."}
+
 @app.get("/poems")
 async def get_poems():
     """Get all archive poems"""
