@@ -18,6 +18,7 @@ from PIL import Image
 from io import BytesIO
 
 # Load environment variables from .env file
+# Deploy refresh trigger
 load_dotenv()
 
 app = FastAPI(title="J.D. Evans Poem Generator API")
