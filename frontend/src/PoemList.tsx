@@ -46,8 +46,8 @@ const PoemList = ({ poems, selectedPoemId, onPoemClick, onPoemGenerated, isGener
             className={`archive-poem-item${String(selectedPoemId) === String(poem.id) ? ' selected' : ''}`}
             onClick={() => onPoemClick && onPoemClick(String(poem.id))}
           >
-            <div className="archive-poem-title">{poem.title}</div>
             <div className="archive-poem-id">#{poem.id}</div>
+            <div className="archive-poem-title">{poem.title}</div>
           </Link>
         ))
       )}

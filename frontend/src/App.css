@@ -62,8 +62,8 @@ body, html {
 
 .archive-poem-item {
   padding: 16px 20px;
-  margin-bottom: 12px;
-  background: #faf9f5;
+  margin-bottom: 17px;
+  background: #fefefe;
   border: 1px solid #e8e5db;
   border-radius: 0;
   cursor: pointer;
@@ -89,8 +89,8 @@ body, html {
 
 .archive-poem-title {
   font-family: 'Lato', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: normal;
   color: #2d3748;
   margin-bottom: 6px;
   line-height: 1.4;
@@ -114,11 +114,11 @@ body, html {
 /* Prompt Form */
 .prompt-form {
   width: 100%;
-  background: #faf9f5;
+  background: #fefefe;
   border: 1px solid #e8e5db;
   border-radius: 0;
   padding: 16px 20px;
-  margin-bottom: 12px;
+  margin-bottom: 17px;
   box-sizing: border-box;
   font-family: 'Lato', sans-serif;
   transition: all 0.3s ease;
@@ -189,7 +189,7 @@ body, html {
   text-transform: none;
   letter-spacing: 0;
   font-family: 'Lato', sans-serif;
-  margin-bottom: 12px;
+  margin-bottom: 17px;
 }
 
 .new-poem-button:hover {
@@ -434,11 +434,11 @@ body, html {
 
 .mobile-home .prompt-form {
   width: 100%;
-  background: #faf9f5;
+  background: #fefefe;
   border: 1px solid #e8e5db;
   border-radius: 0;
   padding: 16px 20px;
-  margin-bottom: 12px;
+  margin-bottom: 17px;
   box-sizing: border-box;
   font-family: 'Lato', sans-serif;
   transition: all 0.3s ease;
@@ -465,8 +465,8 @@ body, html {
 
 .mobile-home .archive-poem-item {
   padding: 16px 20px;
-  margin-bottom: 12px;
-  background: #faf9f5;
+  margin-bottom: 17px;
+  background: #fefefe;
   border: 1px solid #e8e5db;
   border-radius: 0;
   cursor: pointer;
@@ -492,8 +492,8 @@ body, html {
 
 .mobile-home .archive-poem-title {
   font-family: 'Lato', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: normal;
   color: #2d3748;
   margin-bottom: 6px;
   line-height: 1.4;
@@ -544,15 +544,15 @@ body, html {
 .tab-button {
   flex: 1;
   padding: 16px 20px;
-  background: white;
+  background: #f8f8f8;
   border: 0;
   border-bottom: 3px solid transparent;
   font: 600 14px 'Lato', sans-serif;
-  color: #666;
+  color: #999;
   letter-spacing: 0.15em;
   cursor: pointer;
   text-align: center;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .tab-button + .tab-button {
@@ -566,6 +566,7 @@ body, html {
 .tab-button.active {
   border-bottom-color: #5D4037;
   color: #333;
+  background: white;
 }
 
 .tab-content {
